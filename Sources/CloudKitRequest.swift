@@ -74,7 +74,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
             }
         }
         
-        if let error = error as? NSError, let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
+        if let error = error as NSError?, let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
             Logging.log("Error: \(error)")
             Logging.log("Will retry after \(retryAfter) seconds")
             runAfter(retryAfter) {
