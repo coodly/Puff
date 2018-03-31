@@ -209,7 +209,7 @@ public extension CloudKitRequest {
                 return
             }
             
-            Logging.log("Completion: \(String(describing: cursor)) - \(error)")
+            Logging.log("Completion: \(String(describing: cursor)) - \(String(describing: error))")
             Logging.log("Have \(self.records.count) records")
             
             let usedCursor = pullAll ? cursor : nil
