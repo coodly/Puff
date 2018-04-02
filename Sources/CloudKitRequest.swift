@@ -74,10 +74,10 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
             }
         }
         
-        if let error = error as NSError?, let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
+        if let error = error as NSError?, let seconds = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
             Logging.log("Error: \(error)")
-            Logging.log("Will retry after \(retryAfter) seconds")
-            runAfter(retryAfter) {
+            Logging.log("Will retry after \(seconds) seconds")
+            run(after: seconds) {
                 Logging.log("Try again")
                 retryClosure()
             }
@@ -90,9 +90,9 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
         }
     }
     
-    private func runAfter(_ seconds: TimeInterval, onQueue queue: DispatchQueue = DispatchQueue.main, closure: @escaping () -> ()) {
-        let delayTime = DispatchTime.now() + Double(Int64(seconds * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
-        queue.asyncAfter(deadline: delayTime, execute: closure)
+    private func run(after seconds: TimeInterval, onQueue queue: DispatchQueue = DispatchQueue.main, closure: @escaping () -> ()) {
+        let milliseconds = Int(seconds * 1000.0)
+        queue.asyncAfter(deadline: .now() + .milliseconds(milliseconds), execute: closure)
     }
 }
 
