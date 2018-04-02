@@ -32,6 +32,8 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
     
     public var container = CKContainer.default()
     
+    public private(set) var cursor: CKQueryCursor?
+    
     public override init() {
         
     }
@@ -66,7 +68,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
             finalizer = {
                 self.records.removeAll()
                 self.deleted.removeAll()
-                self.continueWith(cursor, limit: limit, inDatabase: db)
+                self.nextBatch(using: cursor, limit: limit, inDatabase: db)
             }
         } else {
             finalizer = {
@@ -178,11 +180,11 @@ public extension CloudKitRequest {
         }
     }
 
-    fileprivate func continueWith(_ cursor: CKQueryCursor, limit: Int?, inDatabase db: UsedDatabase) {
+    public func nextBatch(using cursor: CKQueryCursor, limit: Int?, pullAll: Bool = true, inDatabase db: UsedDatabase) {
         Logging.log("Continue with cursor")
         let operation = CKQueryOperation(cursor: cursor)
-        execute(operation, limit: limit, pullAll: true, inDatabase: db) {
-            self.continueWith(cursor, limit: limit, inDatabase: db)
+        execute(operation, limit: limit, pullAll: pullAll, inDatabase: db) {
+            self.nextBatch(using: cursor, limit: limit, inDatabase: db)
         }
     }
     
@@ -211,6 +213,8 @@ public extension CloudKitRequest {
             
             Logging.log("Completion: \(String(describing: cursor)) - \(String(describing: error))")
             Logging.log("Have \(self.records.count) records")
+            
+            self.cursor = cursor
             
             let usedCursor = pullAll ? cursor : nil
             
