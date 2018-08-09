@@ -61,7 +61,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
         }
     }
     
-    fileprivate func handleResult(withCursor cursor: CKQueryCursor?, desiredKeys: [CKRecord.FieldKey]?, limit: Int? = nil, error: Error?, inDatabase db: UsedDatabase, retryClosure: @escaping () -> ()) {
+    fileprivate func handleResult(withCursor cursor: CKQueryCursor?, desiredKeys: [String]?, limit: Int? = nil, error: Error?, inDatabase db: UsedDatabase, retryClosure: @escaping () -> ()) {
         let finalizer: () -> ()
         var hadFailure = false
         if let cursor = cursor {
@@ -160,17 +160,17 @@ public extension CloudKitRequest {
 }
 
 public extension CloudKitRequest {
-    public final func fetch(predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), desiredKeys: [CKRecord.FieldKey]? = nil, sort: [NSSortDescriptor] = [], limit: Int? = nil, pullAll: Bool = true, inDatabase db: UsedDatabase = .private) {
+    public final func fetch(predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), desiredKeys: [String]? = nil, sort: [NSSortDescriptor] = [], limit: Int? = nil, pullAll: Bool = true, inDatabase db: UsedDatabase = .private) {
         let query = CKQuery(recordType: T.recordType, predicate: predicate)
         query.sortDescriptors = sort
         perform(query, desiredKeys: desiredKeys, limit: limit, pullAll: pullAll, inDatabase: db)
     }
     
-    public final func fetchFirst(predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), desiredKeys: [CKRecord.FieldKey]? = nil, sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .private) {
+    public final func fetchFirst(predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), desiredKeys: [String]? = nil, sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .private) {
         fetch(predicate: predicate, desiredKeys: desiredKeys, sort: sort, limit: 1, pullAll: false, inDatabase: db)
     }
     
-    private final func perform(_ query: CKQuery, desiredKeys: [CKRecord.FieldKey]?, limit: Int? = nil, pullAll: Bool, inDatabase db: UsedDatabase) {
+    private final func perform(_ query: CKQuery, desiredKeys: [String]?, limit: Int? = nil, pullAll: Bool, inDatabase db: UsedDatabase) {
         Logging.log("Fetch \(query.recordType)")
         
         let fetchOperation = CKQueryOperation(query: query)
@@ -180,7 +180,7 @@ public extension CloudKitRequest {
         }
     }
 
-    public func nextBatch(using cursor: CKQueryCursor, desiredKeys: [CKRecord.FieldKey]? = nil, limit: Int?, pullAll: Bool = true, inDatabase db: UsedDatabase) {
+    public func nextBatch(using cursor: CKQueryCursor, desiredKeys: [String]? = nil, limit: Int?, pullAll: Bool = true, inDatabase db: UsedDatabase) {
         Logging.log("Continue with cursor")
         let operation = CKQueryOperation(cursor: cursor)
         execute(operation, desiredKeys: desiredKeys, limit: limit, pullAll: pullAll, inDatabase: db) {
@@ -188,7 +188,7 @@ public extension CloudKitRequest {
         }
     }
     
-    private func execute(_ fetchOperation: CKQueryOperation, desiredKeys: [CKRecord.FieldKey]?, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase, retryClosure: @escaping () -> ()) {
+    private func execute(_ fetchOperation: CKQueryOperation, desiredKeys: [String]?, limit: Int?, pullAll: Bool, inDatabase db: UsedDatabase, retryClosure: @escaping () -> ()) {
         Logging.log("Run query operation")
         if let limit = limit {
             fetchOperation.resultsLimit = limit
