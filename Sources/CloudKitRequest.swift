@@ -22,17 +22,17 @@ public enum UsedDatabase {
 }
 
 public enum CloudResult<T: RemoteRecord> {
-    case success([T], [CKRecordID])
+    case success([T], [CKRecord.ID])
     case failure
 }
 
 open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
     fileprivate var records = [T]()
-    fileprivate var deleted = [CKRecordID]()
+    fileprivate var deleted = [CKRecord.ID]()
     
     public var container = CKContainer.default()
     
-    public private(set) var cursor: CKQueryCursor?
+    public private(set) var cursor: CKQueryOperation.Cursor?
     
     public override init() {
         
@@ -61,7 +61,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
         }
     }
     
-    fileprivate func handleResult(withCursor cursor: CKQueryCursor?, desiredKeys: [String]?, limit: Int? = nil, error: Error?, inDatabase db: UsedDatabase, retryClosure: @escaping () -> ()) {
+    fileprivate func handleResult(withCursor cursor: CKQueryOperation.Cursor?, desiredKeys: [String]?, limit: Int? = nil, error: Error?, inDatabase db: UsedDatabase, retryClosure: @escaping () -> ()) {
         let finalizer: () -> ()
         var hadFailure = false
         if let cursor = cursor {
@@ -101,7 +101,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
 public extension CloudKitRequest {
     public final func delete(record: T, inDatabase db: UsedDatabase = .private) {
         Logging.log("Delete \(record)")
-        let deleted = CKRecordID(recordName: record.recordName!)
+        let deleted = CKRecord.ID(recordName: record.recordName!)
         
         let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: [deleted])
         operation.modifyRecordsCompletionBlock = {
@@ -123,7 +123,7 @@ public extension CloudKitRequest {
 }
 
 public extension CloudKitRequest {
-    public final func save(records: [T], delete: [CKRecordID] = [], inDatabase db: UsedDatabase = .private) {
+    public final func save(records: [T], delete: [CKRecord.ID] = [], inDatabase db: UsedDatabase = .private) {
         let toSave = records.map { $0.recordRepresentation() }
         
         let operation = CKModifyRecordsOperation(recordsToSave: toSave, recordIDsToDelete: delete)
@@ -180,7 +180,7 @@ public extension CloudKitRequest {
         }
     }
 
-    public func nextBatch(using cursor: CKQueryCursor, desiredKeys: [String]? = nil, limit: Int?, pullAll: Bool = true, inDatabase db: UsedDatabase) {
+    public func nextBatch(using cursor: CKQueryOperation.Cursor, desiredKeys: [String]? = nil, limit: Int?, pullAll: Bool = true, inDatabase db: UsedDatabase) {
         Logging.log("Continue with cursor")
         let operation = CKQueryOperation(cursor: cursor)
         execute(operation, desiredKeys: desiredKeys, limit: limit, pullAll: pullAll, inDatabase: db) {

@@ -19,13 +19,13 @@ import CloudKit
 public protocol RemoteRecord {
     var recordName: String? { get set }
     var recordData: Data? { get set }
-    var parent: CKRecordID? { get set }
+    var parent: CKRecord.ID? { get set }
     static var recordType: String { get }
 
     init()
     
     mutating func loadFields(from record: CKRecord) -> Bool
-    func referenceRepresentation() -> CKReference
+    func referenceRepresentation() -> CKRecord.Reference
 }
 
 public extension RemoteRecord {
@@ -38,8 +38,8 @@ public extension RemoteRecord {
         return loadFields(from: record)
     }
     
-    func referenceRepresentation() -> CKReference {
-        return CKReference(recordID: CKRecordID(recordName: recordName!), action: .deleteSelf)
+    func referenceRepresentation() -> CKRecord.Reference {
+        return CKRecord.Reference(recordID: CKRecord.ID(recordName: recordName!), action: .deleteSelf)
     }
     
     private func archive(record: CKRecord) -> NSMutableData {
@@ -66,7 +66,7 @@ public extension RemoteRecord {
         if let existing = unarchiveRecord() {
             modified = existing
         } else if let name = recordName {
-            modified = CKRecord(recordType: Self.recordType, recordID: CKRecordID(recordName: name))
+            modified = CKRecord(recordType: Self.recordType, recordID: CKRecord.ID(recordName: name))
         } else {
             modified = CKRecord(recordType: Self.recordType)
         }
@@ -77,7 +77,7 @@ public extension RemoteRecord {
                 continue
             }
             
-            if #available(iOS 10, tvOS 10, macOS 10.12, *), label == "parent", let value = child.value as? CKRecordID {
+            if #available(iOS 10, tvOS 10, macOS 10.12, *), label == "parent", let value = child.value as? CKRecord.ID {
                 modified.setParent(value)
             } else if let value = child.value as? NSString {
                 modified[label] = value
@@ -87,7 +87,7 @@ public extension RemoteRecord {
                 modified[label] = value as CKRecordValue
             } else if let value = child.value as? CLLocation {
                 modified[label] = value
-            } else if let value = child.value as? CKReference {
+            } else if let value = child.value as? CKRecord.Reference {
                 modified[label] = value
             } else if let value = child.value as? [String] {
                 modified[label] = value as CKRecordValue
@@ -97,7 +97,7 @@ public extension RemoteRecord {
                 modified[label] = value as CKRecordValue
             } else if let value = child.value as? [CLLocation] {
                 modified[label] = value as CKRecordValue
-            } else if let value = child.value as? [CKReference] {
+            } else if let value = child.value as? [CKRecord.Reference] {
                 modified[label] = value as CKRecordValue
             } else {
                 //Logging.log("Could not cast \(child) value")
