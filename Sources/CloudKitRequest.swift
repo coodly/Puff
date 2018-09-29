@@ -21,9 +21,10 @@ public enum UsedDatabase {
     case `private`
 }
 
-public enum CloudResult<T: RemoteRecord> {
-    case success([T], [CKRecord.ID])
-    case failure
+public struct CloudResult<T: RemoteRecord> {
+    public let records: [T]
+    public let deleted: [CKRecord.ID]
+    public let error: Error?
 }
 
 open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
@@ -76,19 +77,19 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
             }
         }
         
-        if let error = error as NSError?, let seconds = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
+        if let error = error as? CKError, let seconds = error.retryAfterSeconds {
             Logging.log("Error: \(error)")
             Logging.log("Will retry after \(seconds) seconds")
             run(after: seconds) {
                 Logging.log("Try again")
                 retryClosure()
             }
-        } else if let error = error {
-            Logging.log("Error: \(error)")
-            hadFailure = true
-            self.handle(result: .failure, completion: finalizer)
         } else {
-            self.handle(result: .success(self.records, self.deleted), completion: finalizer)
+            if let error = error {
+                hadFailure = true
+                Logging.log("Request error \(error)")
+            }
+            self.handle(result: CloudResult(records: self.records, deleted: self.deleted, error: error), completion: finalizer)
         }
     }
     
