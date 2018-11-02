@@ -99,11 +99,27 @@ public extension RemoteRecord {
                 modified[label] = value as CKRecordValue
             } else if let value = child.value as? [CKRecord.Reference] {
                 modified[label] = value as CKRecordValue
+            } else if let value = child.value as? Data, let file = createTempFile(with: value) {
+                modified[label] = CKAsset(fileURL: file)
             } else {
                 //Logging.log("Could not cast \(child) value")
             }
         }
 
         return modified
+    }
+    
+    private func createTempFile(with data: Data) -> URL? {
+        let tmpDir = URL(fileURLWithPath: NSTemporaryDirectory())
+        try? FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
+        
+        let file = tmpDir.appendingPathComponent(ProcessInfo().globallyUniqueString)
+        do {
+            try data.write(to: file, options: .atomic)
+            return file
+        } catch {
+            Logging.log("Asset file write failed: \(error)")
+            return nil
+        }
     }
 }
