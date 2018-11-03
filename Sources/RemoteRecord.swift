@@ -25,7 +25,7 @@ public protocol RemoteRecord {
     init()
     
     mutating func loadFields(from record: CKRecord) -> Bool
-    func referenceRepresentation() -> CKRecord.Reference
+    func referenceRepresentation(action: CKRecord.Reference.Action) -> CKRecord.Reference
 }
 
 public extension RemoteRecord {
@@ -38,7 +38,7 @@ public extension RemoteRecord {
         return loadFields(from: record)
     }
     
-    func referenceRepresentation() -> CKRecord.Reference {
+    func referenceRepresentation(action: CKRecord.Reference.Action = .deleteSelf) -> CKRecord.Reference {
         return CKRecord.Reference(recordID: CKRecord.ID(recordName: recordName!), action: .deleteSelf)
     }
     
