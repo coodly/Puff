@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = '10.0'
   s.osx.deployment_target = '10.11'
 
-  s.source_files = 'Sources/*.swift'
+  s.source_files = 'Sources/Puff/*.swift'
 
   s.requires_arc = true
 end
