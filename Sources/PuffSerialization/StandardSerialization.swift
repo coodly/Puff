@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-import Foundation
-import CoreData
-import Puff
-import PuffSerialization
-import PuffCoreData
+import CloudKit
 
-@objc(Survivor)
-internal class Survivor: NSManagedObject, RemoteRecord {
-    @NSManaged var cannotUseFightingArts: Bool
-    @NSManaged var name: String?
-    @NSManaged var survival: NSNumber?
-    
-    @NSManaged var recordName: String?
-    @NSManaged var recordData: Data?
+public class StandardSerialization<R: RemoteRecord>: RecordSerialization<R> {
+    public override init() {
+        
+    }
 }

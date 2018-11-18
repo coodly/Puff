@@ -21,8 +21,9 @@ import CloudKit
 #if canImport(Puff)
 import Puff
 #endif
-
-private let SystemAttributes = ["recordName", "recordData"]
+#if canImport(PuffSerialization)
+import PuffSerialization
+#endif
 
 public extension RemoteRecord where Self: NSManagedObject {
     static var recordType: String {
@@ -47,7 +48,7 @@ public extension RemoteRecord where Self: NSManagedObject {
         let record = CKRecord(recordType: Self.recordType)
         
         for (name, attribute) in entity.attributesByName {
-            if SystemAttributes.contains(name) {
+            if PuffSystemAttributes.contains(name) {
                 continue
             }
             

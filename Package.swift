@@ -13,6 +13,12 @@ let package = Package(
         .library(
             name: "PuffCoreData",
             targets: ["PuffCoreData"]),
+        .library(
+            name: "PuffSerialization",
+            targets: ["PuffSerialization"]),
+        .library(
+            name: "PuffLogger",
+            targets: ["PuffLogger"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -26,9 +32,15 @@ let package = Package(
             dependencies: []),
         .target(
             name: "PuffCoreData",
+            dependencies: ["PuffSerialization"]),
+        .target(
+            name: "PuffSerialization",
+            dependencies: []),
+        .target(
+            name: "PuffLogger",
             dependencies: []),
         .testTarget(
             name: "PuffTests",
-            dependencies: ["Puff", "PuffCoreData"]),
+            dependencies: ["Puff", "PuffCoreData", "PuffSerialization", "PuffLogger"]),
     ]
 )

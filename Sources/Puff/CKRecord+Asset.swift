@@ -16,6 +16,10 @@
 
 import CloudKit
 
+#if canImport(PuffLogger)
+import PuffLogger
+#endif
+
 public extension CKRecord {
     public func data(from field: String) -> Data? {
         guard let asset = self[field] as? CKAsset else {

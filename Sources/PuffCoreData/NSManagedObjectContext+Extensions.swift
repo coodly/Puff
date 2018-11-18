@@ -17,7 +17,7 @@
 import CoreData
 
 internal extension NSManagedObjectContext {
-    internal func insertEntiry<T: NSManagedObject>() -> T {
+    internal func insertEntity<T: NSManagedObject>() -> T {
         return NSEntityDescription.insertNewObject(forEntityName: T.entityName, into: self) as! T
     }
 }

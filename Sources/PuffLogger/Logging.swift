@@ -27,7 +27,7 @@ public class Logging {
         sharedInstance.logger = logger
     }
     
-    internal class func log<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
+    public class func log<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
         sharedInstance.logger?.log(object, file: file, function: function, line: line)
     }
 }

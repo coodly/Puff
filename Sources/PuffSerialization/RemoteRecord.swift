@@ -16,6 +16,10 @@
 
 import CloudKit
 
+#if canImport(PuffLogger)
+import PuffLogger
+#endif
+
 public protocol RemoteRecord {
     var recordName: String? { get set }
     var recordData: Data? { get set }

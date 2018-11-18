@@ -16,6 +16,10 @@
 
 import Foundation
 
+#if canImport(PuffLogger)
+import PuffLogger
+#endif
+
 open class ConcurrentOperation: Operation {
     public var completionHandler: ((Bool, ConcurrentOperation) -> ())?
     

@@ -16,6 +16,13 @@
 
 import CloudKit
 
+#if canImport(PuffSerialization)
+import PuffSerialization
+#endif
+#if canImport(PuffLogger)
+import PuffLogger
+#endif
+
 public enum UsedDatabase {
     case `public`
     case `private`
@@ -35,8 +42,10 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
     
     public private(set) var cursor: CKQueryOperation.Cursor?
     
+    public lazy var serialization = StandardSerialization<T>()
+    
     public override init() {
-        
+
     }
     
     public final override func main() {
@@ -125,7 +134,7 @@ public extension CloudKitRequest {
 
 public extension CloudKitRequest {
     public final func save(records: [T], delete: [CKRecord.ID] = [], inDatabase db: UsedDatabase = .private) {
-        let toSave = records.map { $0.recordRepresentation() }
+        let toSave = serialization.serialize(records: records)
         
         let operation = CKModifyRecordsOperation(recordsToSave: toSave, recordIDsToDelete: delete)
         operation.modifyRecordsCompletionBlock = {
@@ -135,12 +144,8 @@ public extension CloudKitRequest {
             Logging.log("Deleted: \(String(describing: deleted?.count))")
             
             if let saved = saved {
-                for s in saved {
-                    var local = T()
-                    if local.load(record: s) {
-                        self.records.append(local)
-                    }
-                }
+                let local = self.serialization.deserialize(records: saved)
+                self.records.append(contentsOf: local)
             }
             
             if let deleted = deleted {
@@ -199,8 +204,7 @@ public extension CloudKitRequest {
         fetchOperation.recordFetchedBlock = {
             record in
             
-            var local = T()
-            if local.load(record: record) {
+            if let local = self.serialization.deserialize(records: [record]).first {
                 self.records.append(local)
             }
         }
