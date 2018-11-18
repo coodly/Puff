@@ -20,4 +20,21 @@ public class StandardSerialization<R: RemoteRecord>: RecordSerialization<R> {
     public override init() {
         
     }
+    
+    public override func serialize(records: [R]) -> [CKRecord] {
+        return records.map({ $0.recordRepresentation() })
+    }
+    
+    public override func deserialize(records: [CKRecord]) -> [R] {
+        return records.compactMap() {
+            remote in
+            
+            var local = R()
+            if local.load(record: remote) {
+                return local
+            }
+            
+            return nil
+        }
+    }
 }
