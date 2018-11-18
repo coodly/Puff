@@ -104,6 +104,14 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
         }
         
+        for (name, _) in entity.entity.relationshipsByName {
+            guard let synced = entity.value(forKey: name) as? RemoteRecord else {
+                continue
+            }
+            
+            record[name] = synced.referenceRepresentation(action: .none)
+        }
+        
         return record
     }
     

@@ -77,17 +77,21 @@ internal class Persistence {
         let syncStatusSyncNeeded = attribute(named: "syncNeeded", type: .booleanAttributeType, defaulrValue: true)
         let syncStatusSyncFailed = attribute(named: "syncFailed", type: .booleanAttributeType, defaulrValue: false)
         
-        // Survivor <-> SyncStatus
-        let attributesHasSyncStatus = attachedSyncStatus()
-        let syncStatusBelongsToAttributes = reversedSyncStatusRelationship(to: attributesDesc, named: "statusForAttributes")
+        // Survivor <-> Attributes
+        let survivorHasAttributes = oneToOneRelationship(to: attributesDesc, named: "attributes")
+        let attributesBelongToSurvivor = oneToOneRelationship(to: survivorDesc, named: "survivor")
         
-        // Attributes <-> SyncStatus
+        // Survivor <-> SyncStatus
         let survivorHasSyncStatus = attachedSyncStatus()
         let syncStatusBelongsToSurvivor = reversedSyncStatusRelationship(to: survivorDesc, named: "statusForSurvivor")
+        
+        // Attributes <-> SyncStatus
+        let attributesHasSyncStatus = attachedSyncStatus()
+        let syncStatusBelongsToAttributes = reversedSyncStatusRelationship(to: attributesDesc, named: "statusForAttributes")
 
         // Entity properties
-        survivorDesc.properties = [survivorName, surviorSurvival, survivorCannotUseFighting, recordNameAttribute(), recordDataAttribute(), survivorHasSyncStatus]
-        attributesDesc.properties = [attributeAccuracy, attributeEvasion, attributeLuck, recordNameAttribute(), recordDataAttribute(), attributesHasSyncStatus]
+        survivorDesc.properties = [survivorName, surviorSurvival, survivorCannotUseFighting, recordNameAttribute(), recordDataAttribute(), survivorHasSyncStatus, survivorHasAttributes]
+        attributesDesc.properties = [attributeAccuracy, attributeEvasion, attributeLuck, recordNameAttribute(), recordDataAttribute(), attributesHasSyncStatus, attributesBelongToSurvivor]
         localSyncStatusDesc.properties = [syncStatusSyncNeeded, syncStatusSyncFailed, syncStatusBelongsToSurvivor, syncStatusBelongsToAttributes]
         
         model.entities = [survivorDesc, syncStatusDesc, attributesDesc]
@@ -133,12 +137,17 @@ internal class Persistence {
     }
     
     private static func reversedSyncStatusRelationship(to desc: NSEntityDescription, named: String) -> NSRelationshipDescription {
-        let syncReversed = NSRelationshipDescription()
-        syncReversed.destinationEntity = desc
-        syncReversed.name = named
-        syncReversed.deleteRule = .nullifyDeleteRule
-        syncReversed.minCount = 0
-        syncReversed.maxCount = 1
-        return syncReversed
+        return oneToOneRelationship(to: desc, named: named, deleteRule: .nullifyDeleteRule)
+    }
+    
+    private static func oneToOneRelationship(to desc: NSEntityDescription, named: String, deleteRule: NSDeleteRule = .cascadeDeleteRule) -> NSRelationshipDescription {
+        let hasSyncStatus = NSRelationshipDescription()
+        hasSyncStatus.destinationEntity = desc
+        hasSyncStatus.name = named
+        hasSyncStatus.deleteRule = deleteRule
+        hasSyncStatus.minCount = 0
+        hasSyncStatus.maxCount = 1
+        
+        return hasSyncStatus
     }
 }
