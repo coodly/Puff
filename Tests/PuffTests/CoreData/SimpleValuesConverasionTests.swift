@@ -23,12 +23,18 @@ import CloudKit
 class SimpleValuesConverasionTests: XCTestCase {
     private var persistence: Persistence!
     private var serialization: CoreDataSerialization<Survivor>!
+    private var existing: Survivor!
     
     override func setUp() {
         super.setUp()
 
         persistence = Persistence.inMemoryPersistence()
         serialization = CoreDataSerialization<Survivor>(context: persistence.mainContext)
+        
+        existing = persistence.mainContext.insertEntity()
+        existing.recordName = "existing-1"
+        existing.name = "My name"
+        existing.survival = NSNumber(value: 3)
     }
     
     func testSurvivorDetailsSerialization() {
@@ -59,5 +65,24 @@ class SimpleValuesConverasionTests: XCTestCase {
         XCTAssertTrue(survivor?.cannotUseFightingArts ?? false)
         XCTAssertNotNil(survivor?.recordName)
         XCTAssertNotNil(survivor?.recordData)
+    }
+
+    func testExistingUpdated() {
+        let record = CKRecord(recordType: Survivor.entityName, recordID: CKRecord.ID(recordName: "existing-1"))
+        record["name"] = "Mick 2"
+        record["survival"] = NSNumber(value: 121)
+        record["cannotUseFightingArts"] = NSNumber(value: true)
+        
+        let survivor = serialization.deserialize(records: [record]).first
+        XCTAssertNotNil(survivor)
+        persistence.mainContext.refresh(existing, mergeChanges: true)
+        
+        XCTAssertEqual(existing, survivor)
+        XCTAssertEqual(existing.recordName, "existing-1")
+        XCTAssertEqual("Mick 2", existing.name)
+        XCTAssertEqual(121, existing.survival?.intValue)
+        XCTAssertTrue(existing.cannotUseFightingArts)
+        XCTAssertNotNil(existing.recordName)
+        XCTAssertNotNil(existing.recordData)
     }
 }

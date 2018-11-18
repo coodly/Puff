@@ -16,8 +16,24 @@
 
 import CoreData
 
+#if canImport(PuffLogger)
+import PuffLogger
+#endif
+
 internal extension NSManagedObjectContext {
     internal func insertEntity<T: NSManagedObject>() -> T {
         return NSEntityDescription.insertNewObject(forEntityName: T.entityName, into: self) as! T
+    }
+    
+    internal func fetch<T: NSManagedObject>(with names: [String]) -> [T] {
+        let request: NSFetchRequest<T> = NSFetchRequest(entityName: T.entityName)
+        request.predicate = NSPredicate(format: "recordName IN %@", names)
+        
+        do {
+            return try fetch(request)
+        } catch {
+            Logging.log("Fetch \(T.entityName) failure. Error \(error)")
+            return []
+        }
     }
 }

@@ -40,19 +40,20 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
     public override func deserialize(records: [CKRecord]) -> [R] {
         var deserialized = [R]()
         context.performAndWait {
+            let names = records.map({ $0.recordID.recordName })
+            let existing: [R] = context.fetch(with: names)
             for record in records {
-                if let loaded = load(record: record) {
-                    deserialized.append(loaded)
-                }
+                let saved: R = existing.first(where: { $0.recordName == record.recordID.recordName }) ?? context.insertEntity()
+                load(record: record, into: saved)
+                deserialized.append(saved)
             }
         }
         
         return deserialized
     }
     
-    private func load(record: CKRecord) -> R? {
-        var local: R = context.insertEntity()
-        
+    private func load(record: CKRecord, into modified: R) {
+        var local = modified
         for (name, attribute) in R.entity().attributesByName {
             if name == "recordName" {
                 local.recordName = record.recordID.recordName
@@ -73,8 +74,6 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 Logging.log(message)
             }
         }
-
-        return local
     }
     
     private func serialize(entity: R) -> CKRecord {
