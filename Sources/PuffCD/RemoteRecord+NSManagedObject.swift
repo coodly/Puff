@@ -22,6 +22,8 @@ import CloudKit
 import Puff
 #endif
 
+private let SystemAttributes = ["recordName", "recordData"]
+
 public extension RemoteRecord where Self: NSManagedObject {
     static var recordType: String {
         return entityName
@@ -29,10 +31,10 @@ public extension RemoteRecord where Self: NSManagedObject {
     
     var parent: CKRecord.ID? {
         get {
-            return nil
+            fatalError()
         }
         set {
-            
+            fatalError()
         }
     }
     
@@ -40,7 +42,28 @@ public extension RemoteRecord where Self: NSManagedObject {
         return true
     }
     
+    @available(OSX 10.11, *)
     internal func recordRepresentation() -> CKRecord? {
-        return nil
+        let record = CKRecord(recordType: Self.recordType)
+        
+        for (name, attribute) in entity.attributesByName {
+            if SystemAttributes.contains(name) {
+                continue
+            }
+            
+            switch attribute.attributeType {
+            case .integer16AttributeType, .integer32AttributeType, .integer64AttributeType:
+                record[name] = value(forKey: name) as? NSNumber
+            case .stringAttributeType:
+                record[name] = value(forKey: name) as? String
+            case .booleanAttributeType:
+                record[name] = NSNumber(booleanLiteral: value(forKey: name) as? Bool ?? attribute.defaultValue as? Bool ?? false)
+            default:
+                assertionFailure()
+                print("Unhandled attribute type: \(attribute.attributeType)")
+            }
+        }
+        
+        return record
     }
 }

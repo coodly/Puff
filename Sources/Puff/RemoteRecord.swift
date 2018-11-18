@@ -39,7 +39,7 @@ public extension RemoteRecord {
     }
     
     func referenceRepresentation(action: CKRecord.Reference.Action = .deleteSelf) -> CKRecord.Reference {
-        return CKRecord.Reference(recordID: CKRecord.ID(recordName: recordName!), action: .deleteSelf)
+        return CKRecord.Reference(recordID: CKRecord.ID(recordName: recordName!), action: action)
     }
     
     private func archive(record: CKRecord) -> NSMutableData {

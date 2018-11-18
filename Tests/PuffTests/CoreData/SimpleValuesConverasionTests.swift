@@ -30,5 +30,10 @@ class SimpleValuesConverasionTests: XCTestCase {
         
         let record = survivor.recordRepresentation()
         XCTAssertNotNil(record)
+        
+        XCTAssertEqual("Survivor", record?.recordType)
+        XCTAssertEqual("Jack", record?["name"])
+        XCTAssertEqual(NSNumber(value: 1), record?["survival"])
+        XCTAssertEqual(NSNumber(booleanLiteral: false), record?["cannotUseFightingArts"])
     }
 }
