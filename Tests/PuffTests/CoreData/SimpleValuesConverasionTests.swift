@@ -57,5 +57,7 @@ class SimpleValuesConverasionTests: XCTestCase {
         XCTAssertEqual("Mick", survivor?.name)
         XCTAssertEqual(12, survivor?.survival?.intValue)
         XCTAssertTrue(survivor?.cannotUseFightingArts ?? false)
+        XCTAssertNotNil(survivor?.recordName)
+        XCTAssertNotNil(survivor?.recordData)
     }
 }

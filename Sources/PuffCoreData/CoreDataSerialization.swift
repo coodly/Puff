@@ -78,7 +78,14 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
     }
     
     private func serialize(entity: R) -> CKRecord {
-        let record = CKRecord(recordType: R.recordType)
+        let record: CKRecord
+        if let existing = unarchiveRecord(entity: entity) {
+            record = existing
+        } else if let name = entity.recordName {
+            record = CKRecord(recordType: R.entityName, recordID: CKRecord.ID(recordName: name))
+        } else {
+            record = CKRecord(recordType: R.entityName)
+        }
         
         for (name, attribute) in entity.entity.attributesByName {
             if PuffSystemAttributes.contains(name) {
@@ -99,5 +106,15 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
         }
         
         return record
+    }
+    
+    private func unarchiveRecord(entity: RemoteRecord) -> CKRecord? {
+        guard let data = entity.recordData else {
+            return nil
+        }
+        
+        let coder = NSKeyedUnarchiver(forReadingWith: data)
+        coder.requiresSecureCoding = true
+        return CKRecord(coder: coder)
     }
 }
