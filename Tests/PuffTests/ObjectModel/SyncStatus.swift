@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-import Foundation
 import CoreData
-import Puff
-import PuffSerialization
-import PuffCoreData
 
-@objc(Survivor)
-internal class Survivor: NSManagedObject, RemoteRecord, Syncable {    
-    @NSManaged var cannotUseFightingArts: Bool
-    @NSManaged var name: String?
-    @NSManaged var survival: NSNumber?
+@objc(SyncStatus)
+internal class SyncStatus: NSManagedObject {
+    @NSManaged var syncNeeded: Bool
+    @NSManaged var syncFailed: Bool
     
-    @NSManaged var recordName: String?
-    @NSManaged var recordData: Data?
-    
-    @NSManaged var syncStatus: SyncStatus?
+    @NSManaged var statusForSurvivor: Survivor?
 }

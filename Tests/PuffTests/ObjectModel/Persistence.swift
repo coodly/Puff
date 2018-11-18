@@ -29,7 +29,7 @@ internal class Persistence {
     }
 
     private lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "Puffed", managedObjectModel: objectModel)
+        let container = NSPersistentContainer(name: "Puffed", managedObjectModel: Persistence.objectModel)
         let config = NSPersistentStoreDescription()
         
         config.type = NSSQLiteStoreType
@@ -54,33 +54,58 @@ internal class Persistence {
         return container
     }()
     
-    private lazy var objectModel: NSManagedObjectModel = {
+    private static var objectModel: NSManagedObjectModel = {
         let model = NSManagedObjectModel()
         
         // Survivor
         let survivorDesc = NSEntityDescription()
-        survivorDesc.name = "Survivor"
+        survivorDesc.name = Survivor.entityName
         survivorDesc.managedObjectClassName = Survivor.entityName
         
         let survivorName = attribute(named: "name", type: .stringAttributeType)
         let surviorSurvival = attribute(named: "survival", type: .integer32AttributeType)
         let survivorCannotUseFighting = attribute(named: "cannotUseFightingArts", type: .booleanAttributeType, defaulrValue: false)
         
-        survivorDesc.properties = [survivorName, surviorSurvival, survivorCannotUseFighting, recordNameAttribute(), recordDataAttribute()]
+        // SyncStatus
+        let syncStatusDesc = NSEntityDescription()
+        syncStatusDesc.name = SyncStatus.entityName
+        syncStatusDesc.managedObjectClassName = SyncStatus.entityName
         
-        model.entities = [survivorDesc]
+        let syncStatusSyncNeeded = attribute(named: "syncNeeded", type: .booleanAttributeType, defaulrValue: true)
+        let syncStatusSyncFailed = attribute(named: "syncFailed", type: .booleanAttributeType, defaulrValue: false)
+        
+        // Survivor <-> SyncStatus
+        let survivorHasSyncStatus = NSRelationshipDescription()
+        survivorHasSyncStatus.destinationEntity = syncStatusDesc
+        survivorHasSyncStatus.name = "syncStatus"
+        survivorHasSyncStatus.deleteRule = .cascadeDeleteRule
+        survivorHasSyncStatus.minCount = 0
+        survivorHasSyncStatus.maxCount = 1
+
+        let syncStatusBelongsToSurvivor = NSRelationshipDescription()
+        syncStatusBelongsToSurvivor.destinationEntity = survivorDesc
+        syncStatusBelongsToSurvivor.name = "statusForSurvivor"
+        syncStatusBelongsToSurvivor.deleteRule = .nullifyDeleteRule
+        syncStatusBelongsToSurvivor.minCount = 0
+        syncStatusBelongsToSurvivor.maxCount = 1
+        
+        // Entity properties
+        survivorDesc.properties = [survivorName, surviorSurvival, survivorCannotUseFighting, recordNameAttribute(), recordDataAttribute(), survivorHasSyncStatus]
+        syncStatusDesc.properties = [syncStatusSyncNeeded, syncStatusSyncFailed, syncStatusBelongsToSurvivor]
+        
+        model.entities = [survivorDesc, syncStatusDesc]
         
         return model
     }()
     
-    private func recordNameAttribute() -> NSAttributeDescription {
+    private static func recordNameAttribute() -> NSAttributeDescription {
         return attribute(named: "recordName", type: .stringAttributeType)
     }
-    private func recordDataAttribute() -> NSAttributeDescription {
+    private static func recordDataAttribute() -> NSAttributeDescription {
         return attribute(named: "recordData", type: .binaryDataAttributeType)
     }
 
-    private func attribute(named: String, type: NSAttributeType, defaulrValue: Any? = nil) -> NSAttributeDescription {
+    private static func attribute(named: String, type: NSAttributeType, defaulrValue: Any? = nil) -> NSAttributeDescription {
         let desc = NSAttributeDescription()
         desc.name = named
         desc.attributeType = type
