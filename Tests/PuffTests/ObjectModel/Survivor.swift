@@ -29,5 +29,6 @@ internal class Survivor: NSManagedObject, RemoteRecord, Syncable {
     @NSManaged var recordName: String?
     @NSManaged var recordData: Data?
     
+    @NSManaged var attributes: Attributes?
     @NSManaged var syncStatus: SyncStatus?
 }

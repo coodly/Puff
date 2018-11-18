@@ -22,4 +22,5 @@ internal class SyncStatus: NSManagedObject {
     @NSManaged var syncFailed: Bool
     
     @NSManaged var statusForSurvivor: Survivor?
+    @NSManaged var statusForAttributes: Attributes?
 }

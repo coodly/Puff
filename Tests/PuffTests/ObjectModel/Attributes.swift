@@ -15,8 +15,18 @@
  */
 
 import CoreData
+import PuffSerialization
+import PuffCoreData
 
 @objc(Attributes)
-internal class Attributes: NSManagedObject {
+internal class Attributes: NSManagedObject, RemoteRecord, Syncable {
+    @NSManaged var accuracy: NSNumber
+    @NSManaged var evasion: NSNumber
+    @NSManaged var luck: NSNumber
     
+    @NSManaged var recordName: String?
+    @NSManaged var recordData: Data?
+    
+    @NSManaged var survivor: Survivor?
+    @NSManaged var syncStatus: SyncStatus?
 }

@@ -58,45 +58,52 @@ internal class Persistence {
         let model = NSManagedObjectModel()
         
         // Survivor
-        let survivorDesc = NSEntityDescription()
-        survivorDesc.name = Survivor.entityName
-        survivorDesc.managedObjectClassName = Survivor.entityName
+        let survivorDesc = entityDescription(for: Survivor.self)
         
         let survivorName = attribute(named: "name", type: .stringAttributeType)
         let surviorSurvival = attribute(named: "survival", type: .integer32AttributeType)
         let survivorCannotUseFighting = attribute(named: "cannotUseFightingArts", type: .booleanAttributeType, defaulrValue: false)
         
+        // Attributes
+        let attributesDesc = entityDescription(for: Attributes.self)
+        
+        let attributeAccuracy = attribute(named: "accuracy", type: .integer32AttributeType, defaulrValue: NSNumber(value: 0), optional: false)
+        let attributeEvasion = attribute(named: "evasion", type: .integer32AttributeType, defaulrValue: NSNumber(value: 0), optional: false)
+        let attributeLuck = attribute(named: "luck", type: .integer32AttributeType, defaulrValue: NSNumber(value: 0), optional: false)
+        
         // SyncStatus
-        let syncStatusDesc = NSEntityDescription()
-        syncStatusDesc.name = SyncStatus.entityName
-        syncStatusDesc.managedObjectClassName = SyncStatus.entityName
+        let localSyncStatusDesc = syncStatusDesc
         
         let syncStatusSyncNeeded = attribute(named: "syncNeeded", type: .booleanAttributeType, defaulrValue: true)
         let syncStatusSyncFailed = attribute(named: "syncFailed", type: .booleanAttributeType, defaulrValue: false)
         
         // Survivor <-> SyncStatus
-        let survivorHasSyncStatus = NSRelationshipDescription()
-        survivorHasSyncStatus.destinationEntity = syncStatusDesc
-        survivorHasSyncStatus.name = "syncStatus"
-        survivorHasSyncStatus.deleteRule = .cascadeDeleteRule
-        survivorHasSyncStatus.minCount = 0
-        survivorHasSyncStatus.maxCount = 1
-
-        let syncStatusBelongsToSurvivor = NSRelationshipDescription()
-        syncStatusBelongsToSurvivor.destinationEntity = survivorDesc
-        syncStatusBelongsToSurvivor.name = "statusForSurvivor"
-        syncStatusBelongsToSurvivor.deleteRule = .nullifyDeleteRule
-        syncStatusBelongsToSurvivor.minCount = 0
-        syncStatusBelongsToSurvivor.maxCount = 1
+        let attributesHasSyncStatus = attachedSyncStatus()
+        let syncStatusBelongsToAttributes = reversedSyncStatusRelationship(to: attributesDesc, named: "statusForAttributes")
         
+        // Attributes <-> SyncStatus
+        let survivorHasSyncStatus = attachedSyncStatus()
+        let syncStatusBelongsToSurvivor = reversedSyncStatusRelationship(to: survivorDesc, named: "statusForSurvivor")
+
         // Entity properties
         survivorDesc.properties = [survivorName, surviorSurvival, survivorCannotUseFighting, recordNameAttribute(), recordDataAttribute(), survivorHasSyncStatus]
-        syncStatusDesc.properties = [syncStatusSyncNeeded, syncStatusSyncFailed, syncStatusBelongsToSurvivor]
+        attributesDesc.properties = [attributeAccuracy, attributeEvasion, attributeLuck, recordNameAttribute(), recordDataAttribute(), attributesHasSyncStatus]
+        localSyncStatusDesc.properties = [syncStatusSyncNeeded, syncStatusSyncFailed, syncStatusBelongsToSurvivor, syncStatusBelongsToAttributes]
         
-        model.entities = [survivorDesc, syncStatusDesc]
+        model.entities = [survivorDesc, syncStatusDesc, attributesDesc]
         
         return model
     }()
+    
+    // SyncStatus
+    private static let syncStatusDesc: NSEntityDescription = entityDescription(for: SyncStatus.self)
+    
+    private static func entityDescription<T: NSManagedObject>(for type: T.Type) -> NSEntityDescription {
+        let desc = NSEntityDescription()
+        desc.name = T.entityName
+        desc.managedObjectClassName = T.entityName
+        return desc
+    }
     
     private static func recordNameAttribute() -> NSAttributeDescription {
         return attribute(named: "recordName", type: .stringAttributeType)
@@ -105,11 +112,33 @@ internal class Persistence {
         return attribute(named: "recordData", type: .binaryDataAttributeType)
     }
 
-    private static func attribute(named: String, type: NSAttributeType, defaulrValue: Any? = nil) -> NSAttributeDescription {
+    private static func attribute(named: String, type: NSAttributeType, defaulrValue: Any? = nil, optional: Bool = true) -> NSAttributeDescription {
         let desc = NSAttributeDescription()
         desc.name = named
         desc.attributeType = type
         desc.defaultValue = defaulrValue
+        desc.isOptional = optional
         return desc
+    }
+    
+    private static func attachedSyncStatus() -> NSRelationshipDescription {
+        let hasSyncStatus = NSRelationshipDescription()
+        hasSyncStatus.destinationEntity = syncStatusDesc
+        hasSyncStatus.name = "syncStatus"
+        hasSyncStatus.deleteRule = .cascadeDeleteRule
+        hasSyncStatus.minCount = 0
+        hasSyncStatus.maxCount = 1
+        
+        return hasSyncStatus
+    }
+    
+    private static func reversedSyncStatusRelationship(to desc: NSEntityDescription, named: String) -> NSRelationshipDescription {
+        let syncReversed = NSRelationshipDescription()
+        syncReversed.destinationEntity = desc
+        syncReversed.name = named
+        syncReversed.deleteRule = .nullifyDeleteRule
+        syncReversed.minCount = 0
+        syncReversed.maxCount = 1
+        return syncReversed
     }
 }
