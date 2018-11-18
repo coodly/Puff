@@ -74,6 +74,26 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 Logging.log(message)
             }
         }
+        
+        for (name, relationship) in R.entity().relationshipsByName {
+            guard let reference = record[name] as? CKRecord.Reference else {
+                continue
+            }
+            
+            guard let destination = relationship.destinationEntity else {
+                continue
+            }
+            
+            guard destination.properties.first(where: { $0.name == PuffSystemAttributeRecordName }) != nil else {
+                continue
+            }
+
+            guard let entity = context.fetchEntity(named: destination.name!, withRecordName: reference.recordID.recordName) else {
+                continue
+            }
+            
+            local.setValue(entity, forKey: name)
+        }
     }
     
     private func serialize(entity: R) -> CKRecord {

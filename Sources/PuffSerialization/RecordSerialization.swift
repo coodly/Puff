@@ -16,7 +16,8 @@
 
 import CloudKit
 
-public let PuffSystemAttributes = ["recordName", "recordData"]
+public let PuffSystemAttributeRecordName = "recordName"
+public let PuffSystemAttributes = [PuffSystemAttributeRecordName, "recordData"]
 
 open class RecordSerialization<R: RemoteRecord> {
     public init() {

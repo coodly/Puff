@@ -37,4 +37,19 @@ class RelationshipsSerializationTests: XCTestCase {
         XCTAssertNotNil(attributesReference)
         XCTAssertEqual("attributes-for-jack", attributesReference?.recordID.recordName)
     }
+    
+    func testOnDeserializationReferenceRelationshipCreated() {
+        let attributes: Attributes = persistence.mainContext.insertEntity()
+        attributes.recordName = "attributes-for-jack"
+        attributes.accuracy = NSNumber(value: 12)
+
+        let record = CKRecord(recordType: Survivor.entityName)
+        record["attributes"] = CKRecord.Reference(recordID: CKRecord.ID(recordName: "attributes-for-jack"), action: .none)
+        record["name"] = "Jack"
+        
+        let survivor = survivorSerialization.deserialize(records: [record]).first
+        XCTAssertNotNil(survivor)
+        XCTAssertNotNil(survivor?.attributes)
+        XCTAssertEqual(12, survivor?.attributes?.accuracy.intValue ?? 0)
+    }
 }

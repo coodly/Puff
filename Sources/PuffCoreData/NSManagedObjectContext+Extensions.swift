@@ -36,4 +36,17 @@ internal extension NSManagedObjectContext {
             return []
         }
     }
+    
+    internal func fetchEntity(named entityName: String, withRecordName recordName: String) -> NSManagedObject? {
+        let request: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: entityName)
+        request.predicate = NSPredicate(format: "recordName = %@", recordName)
+        request.fetchLimit = 1
+
+        do {
+            return try fetch(request).first
+        } catch {
+            Logging.log("Fetch \(entityName) failure. Error \(error)")
+            return nil
+        }
+    }
 }
