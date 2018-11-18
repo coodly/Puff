@@ -16,7 +16,7 @@
 
 import XCTest
 @testable import Puff
-@testable import PuffCD
+@testable import PuffCoreData
 
 @available(OSX 10.12, *)
 class SimpleValuesConverasionTests: XCTestCase {

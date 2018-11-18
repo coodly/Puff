@@ -11,8 +11,8 @@ let package = Package(
             name: "Puff",
             targets: ["Puff"]),
         .library(
-            name: "PuffCD",
-            targets: ["PuffCD"]),
+            name: "PuffCoreData",
+            targets: ["PuffCoreData"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -25,10 +25,10 @@ let package = Package(
             name: "Puff",
             dependencies: []),
         .target(
-            name: "PuffCD",
+            name: "PuffCoreData",
             dependencies: []),
         .testTarget(
             name: "PuffTests",
-            dependencies: ["Puff", "PuffCD"]),
+            dependencies: ["Puff", "PuffCoreData"]),
     ]
 )

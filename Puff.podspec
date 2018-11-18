@@ -20,6 +20,6 @@ Pod::Spec.new do |s|
   end
   
   s.subspec 'CoreData' do |cd|
-    cd.source_files = "Sources/PuffCD/*.swift"
+    cd.source_files = "Sources/PuffCoreData/*.swift"
   end
 end

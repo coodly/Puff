@@ -16,7 +16,7 @@
 
 import Foundation
 import CoreData
-@testable import PuffCD
+@testable import PuffCoreData
 
 @available(OSX 10.12, *)
 internal class Persistence {
