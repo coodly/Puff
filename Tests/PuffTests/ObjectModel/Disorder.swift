@@ -19,7 +19,7 @@ import PuffSerialization
 import PuffCoreData
 
 @objc(Disorder)
-internal class Disorder: NSManagedObject, RemoteRecord, Syncable {
+internal class Disorder: NSManagedObject, CloudSerializedEntity, Syncable {
     @NSManaged var name: String
 
     @NSManaged var survivors: Set<Survivor>?

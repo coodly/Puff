@@ -14,33 +14,16 @@
  * limitations under the License.
  */
 
-import Foundation
-import CoreData
-import Puff
+#if canImport(PuffSerialization)
 import PuffSerialization
-import PuffCoreData
+#endif
 
-@objc(Survivor)
-internal class Survivor: NSManagedObject, CloudSerializedEntity, Syncable {    
-    @NSManaged var cannotUseFightingArts: Bool
-    @NSManaged var name: String?
-    @NSManaged var survival: NSNumber?
-    
-    @NSManaged var recordName: String?
-    @NSManaged var recordData: Data?
-    
-    @NSManaged var attributes: Attributes?
-    @NSManaged var syncStatus: SyncStatus?
-    
-    @NSManaged var disorders: Set<Disorder>?
-    
+public protocol CloudSerializedEntity: RemoteRecord {
+    func shouldSerializeRelationship(named: String) -> Bool
+}
+
+public extension CloudSerializedEntity {
     func shouldSerializeRelationship(named: String) -> Bool {
-        switch named {
-        case "disorders": fallthrough
-        case "attributes":
-            return true
-        default:
-            return false
-        }
+        return false
     }
 }

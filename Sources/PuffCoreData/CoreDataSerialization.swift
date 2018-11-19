@@ -75,7 +75,15 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
         }
         
+        guard let cloudSerialized = modified as? CloudSerializedEntity else {
+            return
+        }
+        
         for (name, relationship) in R.entity().relationshipsByName {
+            guard cloudSerialized.shouldSerializeRelationship(named: name) else {
+                continue
+            }
+            
             guard let reference = record[name] as? CKRecord.Reference else {
                 continue
             }
@@ -125,7 +133,15 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
         }
         
+        guard let cloudSerialized = entity as? CloudSerializedEntity else {
+            return record
+        }
+        
         for (name, _) in entity.entity.relationshipsByName {
+            guard cloudSerialized.shouldSerializeRelationship(named: name) else {
+                continue
+            }
+            
             if let synced = entity.value(forKey: name) as? RemoteRecord {
                 record[name] = synced.referenceRepresentation(action: .none)
                 continue
