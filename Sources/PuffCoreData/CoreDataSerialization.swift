@@ -126,11 +126,16 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
         }
         
         for (name, _) in entity.entity.relationshipsByName {
-            guard let synced = entity.value(forKey: name) as? RemoteRecord else {
+            if let synced = entity.value(forKey: name) as? RemoteRecord {
+                record[name] = synced.referenceRepresentation(action: .none)
                 continue
             }
             
-            record[name] = synced.referenceRepresentation(action: .none)
+            guard let set = entity.value(forKey: name) as? NSSet, let relationshipRecords = Array(set) as? [RemoteRecord] else {
+                continue
+            }
+            
+            record[name] = relationshipRecords.map({ $0.referenceRepresentation(action: .none) })
         }
         
         return record

@@ -15,9 +15,11 @@
  */
 
 import CoreData
+import PuffSerialization
+import PuffCoreData
 
 @objc(Disorder)
-internal class Disorder: NSManagedObject {
+internal class Disorder: NSManagedObject, RemoteRecord, Syncable {
     @NSManaged var name: String
 
     @NSManaged var survivors: Set<Survivor>?
