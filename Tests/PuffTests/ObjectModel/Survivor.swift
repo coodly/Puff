@@ -31,4 +31,6 @@ internal class Survivor: NSManagedObject, RemoteRecord, Syncable {
     
     @NSManaged var attributes: Attributes?
     @NSManaged var syncStatus: SyncStatus?
+    
+    @NSManaged var disorders: Set<Disorder>?
 }

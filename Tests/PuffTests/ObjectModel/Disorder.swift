@@ -16,12 +16,14 @@
 
 import CoreData
 
-@objc(SyncStatus)
-internal class SyncStatus: NSManagedObject {
-    @NSManaged var syncNeeded: Bool
-    @NSManaged var syncFailed: Bool
+@objc(Disorder)
+internal class Disorder: NSManagedObject {
+    @NSManaged var name: String
+
+    @NSManaged var survivors: Set<Survivor>?
+
+    @NSManaged var recordName: String?
+    @NSManaged var recordData: Data?
     
-    @NSManaged var statusForSurvivor: Survivor?
-    @NSManaged var statusForAttributes: Attributes?
-    @NSManaged var statusForDisorder: Disorder?
+    @NSManaged var syncStatus: SyncStatus?
 }

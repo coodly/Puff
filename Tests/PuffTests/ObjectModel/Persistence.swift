@@ -71,6 +71,9 @@ internal class Persistence {
         let attributeEvasion = attribute(named: "evasion", type: .integer32AttributeType, defaulrValue: NSNumber(value: 0), optional: false)
         let attributeLuck = attribute(named: "luck", type: .integer32AttributeType, defaulrValue: NSNumber(value: 0), optional: false)
         
+        let disorderDesc = entityDescription(for: Disorder.self)
+        let disorderName = attribute(named: "name", type: .stringAttributeType, defaulrValue: nil, optional: false)
+        
         // SyncStatus
         let localSyncStatusDesc = syncStatusDesc
         
@@ -78,8 +81,8 @@ internal class Persistence {
         let syncStatusSyncFailed = attribute(named: "syncFailed", type: .booleanAttributeType, defaulrValue: false)
         
         // Survivor <-> Attributes
-        let survivorHasAttributes = oneToOneRelationship(to: attributesDesc, named: "attributes")
-        let attributesBelongToSurvivor = oneToOneRelationship(to: survivorDesc, named: "survivor")
+        let survivorHasAttributes = relationship(to: attributesDesc, named: "attributes")
+        let attributesBelongToSurvivor = relationship(to: survivorDesc, named: "survivor")
         
         // Survivor <-> SyncStatus
         let survivorHasSyncStatus = attachedSyncStatus()
@@ -88,13 +91,22 @@ internal class Persistence {
         // Attributes <-> SyncStatus
         let attributesHasSyncStatus = attachedSyncStatus()
         let syncStatusBelongsToAttributes = reversedSyncStatusRelationship(to: attributesDesc, named: "statusForAttributes")
+        
+        // Survivor <<->> Disorder
+        let survivorHasManyDisorders = relationship(to: disorderDesc, named: "disorders", deleteRule: .nullifyDeleteRule, isToMany: true)
+        let disorderHasManySurvivors = relationship(to: survivorDesc, named: "survivors", deleteRule: .nullifyDeleteRule, isToMany: true)
+        
+        // Disorder <-> SyncStatus
+        let disorderHasSyncStatus = attachedSyncStatus()
+        let syncStatusBelongsToDisorder = reversedSyncStatusRelationship(to: attributesDesc, named: "statusForDisorder")
 
         // Entity properties
-        survivorDesc.properties = [survivorName, surviorSurvival, survivorCannotUseFighting, recordNameAttribute(), recordDataAttribute(), survivorHasSyncStatus, survivorHasAttributes]
+        survivorDesc.properties = [survivorName, surviorSurvival, survivorCannotUseFighting, recordNameAttribute(), recordDataAttribute(), survivorHasSyncStatus, survivorHasAttributes, survivorHasManyDisorders]
         attributesDesc.properties = [attributeAccuracy, attributeEvasion, attributeLuck, recordNameAttribute(), recordDataAttribute(), attributesHasSyncStatus, attributesBelongToSurvivor]
-        localSyncStatusDesc.properties = [syncStatusSyncNeeded, syncStatusSyncFailed, syncStatusBelongsToSurvivor, syncStatusBelongsToAttributes]
+        disorderDesc.properties = [disorderName, recordNameAttribute(), recordDataAttribute(), disorderHasSyncStatus, disorderHasManySurvivors]
+        localSyncStatusDesc.properties = [syncStatusSyncNeeded, syncStatusSyncFailed, syncStatusBelongsToSurvivor, syncStatusBelongsToAttributes, syncStatusBelongsToDisorder]
         
-        model.entities = [survivorDesc, syncStatusDesc, attributesDesc]
+        model.entities = [survivorDesc, syncStatusDesc, attributesDesc, disorderDesc]
         
         return model
     }()
@@ -137,17 +149,18 @@ internal class Persistence {
     }
     
     private static func reversedSyncStatusRelationship(to desc: NSEntityDescription, named: String) -> NSRelationshipDescription {
-        return oneToOneRelationship(to: desc, named: named, deleteRule: .nullifyDeleteRule)
+        return relationship(to: desc, named: named, deleteRule: .nullifyDeleteRule)
     }
     
-    private static func oneToOneRelationship(to desc: NSEntityDescription, named: String, deleteRule: NSDeleteRule = .cascadeDeleteRule) -> NSRelationshipDescription {
-        let hasSyncStatus = NSRelationshipDescription()
-        hasSyncStatus.destinationEntity = desc
-        hasSyncStatus.name = named
-        hasSyncStatus.deleteRule = deleteRule
-        hasSyncStatus.minCount = 0
-        hasSyncStatus.maxCount = 1
-        
-        return hasSyncStatus
+    private static func relationship(to desc: NSEntityDescription, named: String, deleteRule: NSDeleteRule = .cascadeDeleteRule, isToMany: Bool = false) -> NSRelationshipDescription {
+        let relationship = NSRelationshipDescription()
+        relationship.destinationEntity = desc
+        relationship.name = named
+        relationship.deleteRule = deleteRule
+        if !isToMany {
+            relationship.minCount = 0
+            relationship.maxCount = 1
+        }
+        return relationship
     }
 }
