@@ -52,4 +52,14 @@ class RelationshipsSerializationTests: XCTestCase {
         XCTAssertNotNil(survivor?.attributes)
         XCTAssertEqual(12, survivor?.attributes?.accuracy.intValue ?? 0)
     }
+
+    func testNoLocalDataForReference() {
+        let record = CKRecord(recordType: Survivor.entityName)
+        record["attributes"] = CKRecord.Reference(recordID: CKRecord.ID(recordName: "attributes-for-jack"), action: .none)
+        record["name"] = "Jack"
+        
+        let survivor = survivorSerialization.deserialize(records: [record]).first
+        XCTAssertNotNil(survivor)
+        XCTAssertNil(survivor?.attributes)
+    }
 }

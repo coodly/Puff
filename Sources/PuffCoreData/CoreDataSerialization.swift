@@ -89,6 +89,7 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
 
             guard let entity = context.fetchEntity(named: destination.name!, withRecordName: reference.recordID.recordName) else {
+                Logging.log("No location destination fpr \(relationship.name) named \(reference.recordID.recordName)")
                 continue
             }
             
