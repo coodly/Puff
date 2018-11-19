@@ -18,9 +18,6 @@ import Foundation
 import CoreData
 import CloudKit
 
-#if canImport(Puff)
-import Puff
-#endif
 #if canImport(PuffSerialization)
 import PuffSerialization
 #endif

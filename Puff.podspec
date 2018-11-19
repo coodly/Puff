@@ -17,9 +17,20 @@ Pod::Spec.new do |s|
 
   s.subspec 'Core' do |core|
     core.source_files = 'Sources/Puff/*.swift'
+    core.dependency 'Puff/Serialization'
+    core.dependency 'Puff/Logger'
   end
   
   s.subspec 'CoreData' do |cd|
     cd.source_files = "Sources/PuffCoreData/*.swift"
+  end
+
+  s.subspec 'Serialization' do |s|
+    s.source_files = "Sources/PuffSerialization/*.swift"
+    s.dependency 'Puff/Logger'
+  end
+
+  s.subspec 'Logger' do |l|
+    l.source_files = "Sources/PuffLogger/*.swift"
   end
 end
