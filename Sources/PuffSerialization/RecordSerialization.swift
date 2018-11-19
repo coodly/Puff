@@ -18,6 +18,7 @@ import CloudKit
 
 public let PuffSystemAttributeRecordName = "recordName"
 public let PuffSystemAttributes = [PuffSystemAttributeRecordName, "recordData"]
+public let PuffSystemAttributeModificationDate = "modificationDate"
 
 open class RecordSerialization<R: RemoteRecord> {
     public init() {

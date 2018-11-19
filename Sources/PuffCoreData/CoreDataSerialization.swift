@@ -54,6 +54,11 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
     
     private func load(record: CKRecord, into modified: R) {
         var local = modified
+        
+        if var stamped  = local as? Timestamped {
+            stamped.modificationDate = record.modificationDate
+        }
+        
         for (name, attribute) in R.entity().attributesByName {
             if name == "recordName" {
                 local.recordName = record.recordID.recordName
@@ -117,6 +122,10 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
         
         for (name, attribute) in entity.entity.attributesByName {
             if PuffSystemAttributes.contains(name) {
+                continue
+            }
+            
+            if name == PuffSystemAttributeModificationDate, entity is Timestamped {
                 continue
             }
             
