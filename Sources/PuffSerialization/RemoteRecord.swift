@@ -24,7 +24,7 @@ public protocol RemoteRecord {
     var recordName: String? { get set }
     var recordData: Data? { get set }
     var parent: CKRecord.ID? { get set }
-    static var recordType: String { get }
+    static var recordType: CKRecord.RecordType { get }
 
     init()
     

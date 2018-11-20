@@ -121,9 +121,9 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
         if let existing = unarchiveRecord(entity: entity) {
             record = existing
         } else if let name = entity.recordName {
-            record = CKRecord(recordType: R.entityName, recordID: CKRecord.ID(recordName: name))
+            record = CKRecord(recordType: R.recordType, recordID: CKRecord.ID(recordName: name))
         } else {
-            record = CKRecord(recordType: R.entityName)
+            record = CKRecord(recordType: R.recordType)
         }
         
         for (name, attribute) in entity.entity.attributesByName {
