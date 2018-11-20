@@ -70,9 +70,15 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 continue
             }
             
+            if local is Timestamped, name == PuffSystemAttributeModificationDate {
+                continue
+            }
+            
             switch attribute.attributeType {
             case .stringAttributeType, .integer16AttributeType, .integer32AttributeType, .integer64AttributeType, .booleanAttributeType:
-                local.setValue(record[name], forKey: name)
+                local.setValue(record[name] ?? attribute.defaultValue, forKey: name)
+            case .binaryDataAttributeType:
+                local.setValue(record.data(from: name), forKey: name)
             default:
                 let message = "Unhandled attribute type: \(attribute.attributeType)"
                 assertionFailure(message)
