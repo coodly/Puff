@@ -108,7 +108,7 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
 
             guard let entity = context.fetchEntity(named: destination.name!, withRecordName: reference.recordID.recordName) else {
-                Logging.log("No location destination fpr \(relationship.name) named \(reference.recordID.recordName)")
+                Logging.log("No location destination for \(relationship.name) named \(reference.recordID.recordName)")
                 continue
             }
             
@@ -142,6 +142,12 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 record[name] = entity.value(forKey: name) as? String
             case .booleanAttributeType:
                 record[name] = NSNumber(booleanLiteral: entity.value(forKey: name) as? Bool ?? attribute.defaultValue as? Bool ?? false)
+            case .binaryDataAttributeType:
+                if let data = entity.value(forKey: name) as? Data, let file = createTempFile(with: data) {
+                    record[name] = CKAsset(fileURL: file)
+                } else {
+                    Logging.log("Could not attach data from \(name) as CKAsset")
+                }
             default:
                 assertionFailure()
                 print("Unhandled attribute type: \(attribute.attributeType)")
@@ -180,5 +186,19 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
         let coder = NSKeyedUnarchiver(forReadingWith: data)
         coder.requiresSecureCoding = true
         return CKRecord(coder: coder)
+    }
+    
+    private func createTempFile(with data: Data) -> URL? {
+        let tmpDir = URL(fileURLWithPath: NSTemporaryDirectory())
+        try? FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
+        
+        let file = tmpDir.appendingPathComponent(ProcessInfo().globallyUniqueString)
+        do {
+            try data.write(to: file, options: .atomic)
+            return file
+        } catch {
+            Logging.log("Asset file write failed: \(error)")
+            return nil
+        }
     }
 }
