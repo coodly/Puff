@@ -42,7 +42,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
     
     public private(set) var cursor: CKQueryOperation.Cursor?
     
-    public lazy var serialization = StandardSerialization<T>()
+    public lazy var serialization: RecordSerialization<T> = StandardSerialization<T>()
     
     public override init() {
 
