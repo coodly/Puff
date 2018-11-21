@@ -76,9 +76,9 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             
             switch attribute.attributeType {
             case .stringAttributeType, .integer16AttributeType, .integer32AttributeType, .integer64AttributeType, .booleanAttributeType:
-                local.setValue(record[name] ?? attribute.defaultValue, forKey: name)
+                local.setValue(record[name] ?? local.value(forKey: name) ?? attribute.defaultValue, forKey: name)
             case .binaryDataAttributeType:
-                local.setValue(record.data(from: name), forKey: name)
+                local.setValue(record.data(from: name) ?? local.value(forKey: name), forKey: name)
             default:
                 let message = "Unhandled attribute type: \(attribute.attributeType)"
                 assertionFailure(message)

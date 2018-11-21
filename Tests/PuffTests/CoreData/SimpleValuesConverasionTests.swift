@@ -85,4 +85,21 @@ class SimpleValuesConverasionTests: XCTestCase {
         XCTAssertNotNil(existing.recordName)
         XCTAssertNotNil(existing.recordData)
     }
+    
+    func testLocalDataNotRemovedOnPartialRecordUpdate() {
+        let survivor: Survivor = persistence.mainContext.insertEntity()
+        
+        survivor.recordName = "survivor-one"
+        survivor.name = "Uunp"
+        survivor.survival = NSNumber(value: 7)
+        
+        let record = CKRecord(recordType: Survivor.entityName, recordID: CKRecord.ID(recordName: "survivor-one"))
+        record["name"] = "Mick 2"
+        
+        let deserialized = serialization.deserialize(records: [record]).first
+        XCTAssertNotNil(deserialized)
+        XCTAssertEqual("survivor-one", deserialized?.recordName)
+        XCTAssertEqual("Mick 2", deserialized?.name)
+        XCTAssertEqual(NSNumber(value: 7), deserialized?.survival)
+    }
 }
