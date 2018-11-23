@@ -75,7 +75,7 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
             
             switch attribute.attributeType {
-            case .stringAttributeType, .integer16AttributeType, .integer32AttributeType, .integer64AttributeType, .booleanAttributeType:
+            case .stringAttributeType, .integer16AttributeType, .integer32AttributeType, .integer64AttributeType, .booleanAttributeType, .dateAttributeType:
                 local.setValue(record[name] ?? local.value(forKey: name) ?? attribute.defaultValue, forKey: name)
             case .binaryDataAttributeType:
                 local.setValue(record.data(from: name) ?? local.value(forKey: name), forKey: name)
@@ -94,8 +94,17 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             guard cloudSerialized.shouldSerializeRelationship(named: name) else {
                 continue
             }
+
+            let mappedReferences: [CKRecord.Reference]
+            if let reference = record[name] as? CKRecord.Reference {
+                mappedReferences = [reference]
+            } else if let references = record[name] as? [CKRecord.Reference] {
+                mappedReferences = references
+            } else {
+                mappedReferences = []
+            }
             
-            guard let reference = record[name] as? CKRecord.Reference else {
+            guard mappedReferences.count > 0 else {
                 continue
             }
             
@@ -107,12 +116,22 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 continue
             }
 
-            guard let entity = context.fetchEntity(named: destination.name!, withRecordName: reference.recordID.recordName) else {
-                Logging.log("No location destination for \(relationship.name) named \(reference.recordID.recordName)")
-                continue
+            let entities: [NSManagedObject] = mappedReferences.compactMap() {
+                reference in
+                
+                if let entity = context.fetchEntity(named: destination.name!, withRecordName: reference.recordID.recordName) {
+                    return entity
+                } else {
+                    Logging.log("No location destination for \(relationship.name) named \(reference.recordID.recordName)")
+                    return nil
+                }
             }
-            
-            local.setValue(entity, forKey: name)
+
+            if relationship.isToMany {
+                local.setValue(Set(entities), forKey: name)
+            } else {
+                local.setValue(entities.first, forKey: name)
+            }
         }
     }
     
@@ -142,6 +161,8 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 record[name] = entity.value(forKey: name) as? String
             case .booleanAttributeType:
                 record[name] = NSNumber(booleanLiteral: entity.value(forKey: name) as? Bool ?? attribute.defaultValue as? Bool ?? false)
+            case .dateAttributeType:
+                record[name] = entity.value(forKey: name) as? Date
             case .binaryDataAttributeType:
                 if let data = entity.value(forKey: name) as? Data, let file = createTempFile(with: data) {
                     record[name] = CKAsset(fileURL: file)

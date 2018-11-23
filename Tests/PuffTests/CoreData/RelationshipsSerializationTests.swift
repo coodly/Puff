@@ -62,4 +62,22 @@ class RelationshipsSerializationTests: XCTestCase {
         XCTAssertNotNil(survivor)
         XCTAssertNil(survivor?.attributes)
     }
+    
+    func testToManyRelationshipsDeserialization() {
+        let disorderNames = [0, 1, 2].map({ "disorder-\($0)" })
+        disorderNames.forEach() {
+            name in
+            
+            let disorder: Disorder = persistence.mainContext.insertEntity()
+            disorder.recordName = name
+        }
+        
+        let record = CKRecord(recordType: Survivor.entityName)
+        record["disorders"] = disorderNames.map({ CKRecord.Reference(recordID: CKRecord.ID(recordName: $0), action: .none) })
+        
+        let survivor = survivorSerialization.deserialize(records: [record]).first
+        XCTAssertNotNil(survivor)
+        XCTAssertNotNil(survivor?.disorders)
+        XCTAssertEqual(disorderNames.sorted(), survivor?.disorders?.compactMap({ $0.recordName }).sorted())
+    }
 }
