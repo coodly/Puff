@@ -26,6 +26,8 @@ internal class Survivor: NSManagedObject, CloudSerializedEntity, Syncable {
     @NSManaged var name: String?
     @NSManaged var survival: NSNumber?
     
+    @NSManaged var touchedAt: Date?
+    
     @NSManaged var recordName: String?
     @NSManaged var recordData: Data?
     

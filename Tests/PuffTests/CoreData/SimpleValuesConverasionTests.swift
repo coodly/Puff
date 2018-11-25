@@ -102,4 +102,17 @@ class SimpleValuesConverasionTests: XCTestCase {
         XCTAssertEqual("Mick 2", deserialized?.name)
         XCTAssertEqual(NSNumber(value: 7), deserialized?.survival)
     }
+
+    func testTransientPropertyNotSerializes() {
+        let survivor: Survivor = persistence.mainContext.insertEntity()
+        
+        survivor.recordName = "survivor-one"
+        survivor.name = "Uunp"
+        survivor.survival = NSNumber(value: 7)
+        survivor.touchedAt = Date()
+        
+        let serialized = serialization.serialize(records: [survivor]).first
+        XCTAssertNotNil(serialized)
+        XCTAssertNil(serialized?["touchedAt"])
+    }
 }

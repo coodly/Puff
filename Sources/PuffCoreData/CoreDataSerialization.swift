@@ -74,6 +74,10 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 continue
             }
             
+            if attribute.isTransient {
+                continue
+            }
+            
             switch attribute.attributeType {
             case .stringAttributeType, .integer16AttributeType, .integer32AttributeType, .integer64AttributeType, .booleanAttributeType, .dateAttributeType:
                 local.setValue(record[name] ?? local.value(forKey: name) ?? attribute.defaultValue, forKey: name)
@@ -151,6 +155,10 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
             
             if name == PuffSystemAttributeModificationDate, entity is Timestamped {
+                continue
+            }
+            
+            if attribute.isTransient {
                 continue
             }
             

@@ -62,6 +62,8 @@ internal class Persistence {
         
         let survivorName = attribute(named: "name", type: .stringAttributeType)
         let surviorSurvival = attribute(named: "survival", type: .integer32AttributeType)
+        let surviorTouchedAt = attribute(named: "touchedAt", type: .dateAttributeType)
+        surviorTouchedAt.isTransient = true
         let survivorCannotUseFighting = attribute(named: "cannotUseFightingArts", type: .booleanAttributeType, defaulrValue: false)
         
         // Attributes
@@ -101,7 +103,7 @@ internal class Persistence {
         let syncStatusBelongsToDisorder = reversedSyncStatusRelationship(to: attributesDesc, named: "statusForDisorder")
 
         // Entity properties
-        survivorDesc.properties = [survivorName, surviorSurvival, survivorCannotUseFighting, recordNameAttribute(), recordDataAttribute(), survivorHasSyncStatus, survivorHasAttributes, survivorHasManyDisorders]
+        survivorDesc.properties = [survivorName, surviorSurvival, surviorTouchedAt, survivorCannotUseFighting, recordNameAttribute(), recordDataAttribute(), survivorHasSyncStatus, survivorHasAttributes, survivorHasManyDisorders]
         attributesDesc.properties = [attributeAccuracy, attributeEvasion, attributeLuck, recordNameAttribute(), recordDataAttribute(), attributesHasSyncStatus, attributesBelongToSurvivor]
         disorderDesc.properties = [disorderName, recordNameAttribute(), recordDataAttribute(), disorderHasSyncStatus, disorderHasManySurvivors]
         localSyncStatusDesc.properties = [syncStatusSyncNeeded, syncStatusSyncFailed, syncStatusBelongsToSurvivor, syncStatusBelongsToAttributes, syncStatusBelongsToDisorder]
