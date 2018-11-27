@@ -27,8 +27,10 @@ import PuffLogger
 @available(OSX 10.12, *)
 public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSerialization<R> {
     private let context: NSManagedObjectContext
-    public init(context: NSManagedObjectContext) {
+    private let deserializeUpdatesRecordDetailsOnly: Bool
+    public init(context: NSManagedObjectContext, deserializeUpdatesRecordDetailsOnly: Bool = false) {
         self.context = context
+        self.deserializeUpdatesRecordDetailsOnly = deserializeUpdatesRecordDetailsOnly
         
         super.init()
     }
@@ -70,6 +72,10 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 continue
             }
             
+            if deserializeUpdatesRecordDetailsOnly {
+                continue
+            }
+            
             if local is Timestamped, name == PuffSystemAttributeModificationDate {
                 continue
             }
@@ -88,6 +94,10 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 assertionFailure(message)
                 Logging.log(message)
             }
+        }
+        
+        if deserializeUpdatesRecordDetailsOnly {
+            return
         }
         
         guard let cloudSerialized = modified as? CloudSerializedEntity else {
