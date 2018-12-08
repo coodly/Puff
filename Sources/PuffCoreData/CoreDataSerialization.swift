@@ -61,18 +61,15 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             stamped.modificationDate = record.modificationDate
         }
         
+        local.recordName = record.recordID.recordName
+        local.recordData = archive(record: record)
+        
+        if deserializeUpdatesRecordDetailsOnly {
+            return
+        }
+        
         for (name, attribute) in R.entity().attributesByName {
-            if name == "recordName" {
-                local.recordName = record.recordID.recordName
-                continue
-            }
-            
-            if name == "recordData" {
-                local.recordData = archive(record: record)
-                continue
-            }
-            
-            if deserializeUpdatesRecordDetailsOnly {
+            if PuffSystemAttributes.contains(name) {
                 continue
             }
             
@@ -94,10 +91,6 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 assertionFailure(message)
                 Logging.log(message)
             }
-        }
-        
-        if deserializeUpdatesRecordDetailsOnly {
-            return
         }
         
         guard let cloudSerialized = modified as? CloudSerializedEntity else {
