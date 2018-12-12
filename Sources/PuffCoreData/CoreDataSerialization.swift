@@ -68,6 +68,11 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             return
         }
         
+        if let localTime = (local as? LocalModificationTimeChecked)?.localModificationTime, let remoteTime = record.modificationDate, localTime > remoteTime {
+            Logging.log("Have local modification on \(R.entityName) \(local.recordName ?? "-"): l:\(localTime) vs r:\(remoteTime)")
+            return
+        }
+        
         for (name, attribute) in R.entity().attributesByName {
             if PuffSystemAttributes.contains(name) {
                 continue
