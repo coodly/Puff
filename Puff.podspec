@@ -7,8 +7,8 @@ Pod::Spec.new do |s|
   s.authors = { 'Jaanus Siim' => 'jaanus@coodly.com' }
   s.source = { :git => 'git@github.com:coodly/Puff.git', :tag => s.version }
 
-  s.ios.deployment_target = '10.0'
-  s.tvos.deployment_target = '10.0'
+  s.ios.deployment_target = '9.3'
+  s.tvos.deployment_target = '9.3'
   s.osx.deployment_target = '10.11'
 
   s.requires_arc = true
