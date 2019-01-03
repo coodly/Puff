@@ -24,7 +24,7 @@ import PuffSerialization
 import PuffLogger
 #endif
 
-@available(OSX 10.12, *)
+@available(OSX 10.12, iOS 10, *)
 public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSerialization<R> {
     private let context: NSManagedObjectContext
     private let deserializeUpdatesRecordDetailsOnly: Bool
@@ -87,7 +87,13 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
             
             switch attribute.attributeType {
-            case .stringAttributeType, .integer16AttributeType, .integer32AttributeType, .integer64AttributeType, .booleanAttributeType, .dateAttributeType:
+            case .stringAttributeType,
+                 .integer16AttributeType,
+                 .integer32AttributeType,
+                 .integer64AttributeType,
+                 .booleanAttributeType,
+                 .dateAttributeType,
+                 .doubleAttributeType:
                 local.setValue(record[name] ?? local.value(forKey: name) ?? attribute.defaultValue, forKey: name)
             case .binaryDataAttributeType:
                 local.setValue(record.data(from: name) ?? local.value(forKey: name), forKey: name)
@@ -171,7 +177,7 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
             
             switch attribute.attributeType {
-            case .integer16AttributeType, .integer32AttributeType, .integer64AttributeType:
+            case .integer16AttributeType, .integer32AttributeType, .integer64AttributeType, .doubleAttributeType:
                 record[name] = entity.value(forKey: name) as? NSNumber
             case .stringAttributeType:
                 record[name] = entity.value(forKey: name) as? String
