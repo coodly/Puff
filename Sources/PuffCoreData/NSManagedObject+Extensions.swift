@@ -17,7 +17,7 @@
 import CoreData
 
 internal extension NSManagedObject {
-    internal static var entityName: String {
+    static var entityName: String {
         return NSStringFromClass(self).components(separatedBy: ".").last!
     }
 }

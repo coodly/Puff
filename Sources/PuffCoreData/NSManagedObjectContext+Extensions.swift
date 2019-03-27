@@ -21,11 +21,11 @@ import PuffLogger
 #endif
 
 internal extension NSManagedObjectContext {
-    internal func insertEntity<T: NSManagedObject>() -> T {
+    func insertEntity<T: NSManagedObject>() -> T {
         return NSEntityDescription.insertNewObject(forEntityName: T.entityName, into: self) as! T
     }
     
-    internal func fetch<T: NSManagedObject>(with names: [String]) -> [T] {
+    func fetch<T: NSManagedObject>(with names: [String]) -> [T] {
         let request: NSFetchRequest<T> = NSFetchRequest(entityName: T.entityName)
         request.predicate = NSPredicate(format: "recordName IN %@", names)
         
@@ -37,7 +37,7 @@ internal extension NSManagedObjectContext {
         }
     }
     
-    internal func fetchEntity(named entityName: String, withRecordName recordName: String) -> NSManagedObject? {
+    func fetchEntity(named entityName: String, withRecordName recordName: String) -> NSManagedObject? {
         let request: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: entityName)
         request.predicate = NSPredicate(format: "recordName = %@", recordName)
         request.fetchLimit = 1

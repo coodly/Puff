@@ -21,7 +21,7 @@ import PuffLogger
 #endif
 
 public extension CKRecord {
-    public func data(from field: String) -> Data? {
+    func data(from field: String) -> Data? {
         guard let asset = self[field] as? CKAsset else {
             return nil
         }

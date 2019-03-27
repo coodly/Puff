@@ -110,7 +110,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
 }
 
 public extension CloudKitRequest {
-    public final func delete(record: T, inDatabase db: UsedDatabase = .private) {
+    final func delete(record: T, inDatabase db: UsedDatabase = .private) {
         Logging.log("Delete \(record)")
         let deleted = CKRecord.ID(recordName: record.recordName!)
         
@@ -134,7 +134,7 @@ public extension CloudKitRequest {
 }
 
 public extension CloudKitRequest {
-    public final func save(records: [T], delete: [CKRecord.ID] = [], inDatabase db: UsedDatabase = .private) {
+    final func save(records: [T], delete: [CKRecord.ID] = [], inDatabase db: UsedDatabase = .private) {
         let toSave = serialization.serialize(records: records)
         
         let operation = CKModifyRecordsOperation(recordsToSave: toSave, recordIDsToDelete: delete)
@@ -161,19 +161,19 @@ public extension CloudKitRequest {
         database(for: db).add(operation)
     }
     
-    public final func save(record: T, inDatabase db: UsedDatabase = .private) {
+    final func save(record: T, inDatabase db: UsedDatabase = .private) {
         save(records: [record], inDatabase: db)
     }
 }
 
 public extension CloudKitRequest {
-    public final func fetch(recordType: CKRecord.RecordType = T.recordType, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), desiredKeys: [String]? = nil, sort: [NSSortDescriptor] = [], limit: Int? = nil, pullAll: Bool = true, inDatabase db: UsedDatabase = .private) {
+    final func fetch(recordType: CKRecord.RecordType = T.recordType, predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), desiredKeys: [String]? = nil, sort: [NSSortDescriptor] = [], limit: Int? = nil, pullAll: Bool = true, inDatabase db: UsedDatabase = .private) {
         let query = CKQuery(recordType: recordType, predicate: predicate)
         query.sortDescriptors = sort
         perform(query, desiredKeys: desiredKeys, limit: limit, pullAll: pullAll, inDatabase: db)
     }
     
-    public final func fetchFirst(predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), desiredKeys: [String]? = nil, sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .private) {
+    final func fetchFirst(predicate: NSPredicate = NSPredicate(format: "TRUEPREDICATE"), desiredKeys: [String]? = nil, sort: [NSSortDescriptor] = [], inDatabase db: UsedDatabase = .private) {
         fetch(predicate: predicate, desiredKeys: desiredKeys, sort: sort, limit: 1, pullAll: false, inDatabase: db)
     }
     
@@ -187,7 +187,7 @@ public extension CloudKitRequest {
         }
     }
 
-    public func nextBatch(using cursor: CKQueryOperation.Cursor, desiredKeys: [String]? = nil, limit: Int?, pullAll: Bool = true, inDatabase db: UsedDatabase) {
+    func nextBatch(using cursor: CKQueryOperation.Cursor, desiredKeys: [String]? = nil, limit: Int?, pullAll: Bool = true, inDatabase db: UsedDatabase) {
         Logging.log("Continue with cursor")
         let operation = CKQueryOperation(cursor: cursor)
         execute(operation, desiredKeys: desiredKeys, limit: limit, pullAll: pullAll, inDatabase: db) {
