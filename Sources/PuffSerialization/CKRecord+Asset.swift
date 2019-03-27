@@ -27,9 +27,9 @@ public extension CKRecord {
         }
         
         do {
-            return try Data(contentsOf: asset.fileURL)
+            return try Data(contentsOf: asset.fileURL!)
         } catch {
-            Logging.log("Assed data from \(asset.fileURL) not loaded. Error: \(error)")
+            Logging.log("Assed data from \(asset.fileURL!) not loaded. Error: \(error)")
             return nil
         }
     }
