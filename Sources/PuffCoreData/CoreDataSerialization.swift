@@ -24,7 +24,7 @@ import PuffSerialization
 import PuffLogger
 #endif
 
-@available(OSX 10.12, iOS 10, *)
+@available(OSX 10.12, iOS 10, tvOS 10, *)
 public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSerialization<R> {
     private let context: NSManagedObjectContext
     private let deserializeUpdatesRecordDetailsOnly: Bool
