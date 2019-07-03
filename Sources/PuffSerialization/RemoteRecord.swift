@@ -65,14 +65,14 @@ public extension RemoteRecord {
         return CKRecord(coder: coder)
     }
     
-    internal func recordRepresentation() -> CKRecord {
+    internal func recordRepresentation(in zone: CKRecordZone = .default()) -> CKRecord {
         let modified: CKRecord
         if let existing = unarchiveRecord() {
             modified = existing
         } else if let name = recordName {
-            modified = CKRecord(recordType: Self.recordType, recordID: CKRecord.ID(recordName: name))
+            modified = CKRecord(recordType: Self.recordType, recordID: CKRecord.ID(recordName: name, zoneID: zone.zoneID))
         } else {
-            modified = CKRecord(recordType: Self.recordType)
+            modified = CKRecord(recordType: Self.recordType, recordID: CKRecord.ID(recordName: UUID().uuidString, zoneID: zone.zoneID))
         }
         
         let mirror = Mirror(reflecting: self)

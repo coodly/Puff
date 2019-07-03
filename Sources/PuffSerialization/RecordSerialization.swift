@@ -25,7 +25,7 @@ open class RecordSerialization<R: RemoteRecord> {
         
     }
     
-    open func serialize(records: [R]) -> [CKRecord] {
+    open func serialize(records: [R], in zone: CKRecordZone) -> [CKRecord] {
         fatalError()
     }
     

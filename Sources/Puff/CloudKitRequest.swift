@@ -40,6 +40,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
     fileprivate var deleted = [CKRecord.ID]()
     
     public var container = CKContainer.default()
+    public var zone = CKRecordZone.default()
     
     public private(set) var cursor: CKQueryOperation.Cursor?
     
@@ -112,7 +113,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
 public extension CloudKitRequest {
     final func delete(record: T, inDatabase db: UsedDatabase = .private) {
         Logging.log("Delete \(record)")
-        let deleted = CKRecord.ID(recordName: record.recordName!)
+        let deleted = CKRecord.ID(recordName: record.recordName!, zoneID: zone.zoneID)
         
         let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: [deleted])
         operation.modifyRecordsCompletionBlock = {
@@ -133,9 +134,9 @@ public extension CloudKitRequest {
     }
 }
 
-public extension CloudKitRequest {
-    final func save(records: [T], delete: [CKRecord.ID] = [], inDatabase db: UsedDatabase = .private) {
-        let toSave = serialization.serialize(records: records)
+extension CloudKitRequest {
+    public final func save(records: [T], delete: [CKRecord.ID] = [], inDatabase db: UsedDatabase = .private) {
+        let toSave = serialization.serialize(records: records, in: zone)
         
         let operation = CKModifyRecordsOperation(recordsToSave: toSave, recordIDsToDelete: delete)
         operation.modifyRecordsCompletionBlock = {
@@ -161,7 +162,7 @@ public extension CloudKitRequest {
         database(for: db).add(operation)
     }
     
-    final func save(record: T, inDatabase db: UsedDatabase = .private) {
+    public final func save(record: T, inDatabase db: UsedDatabase = .private) {
         save(records: [record], inDatabase: db)
     }
 }
@@ -201,6 +202,7 @@ public extension CloudKitRequest {
             fetchOperation.resultsLimit = limit
         }
         fetchOperation.desiredKeys = desiredKeys
+        fetchOperation.zoneID = zone.zoneID
         
         fetchOperation.recordFetchedBlock = {
             record in

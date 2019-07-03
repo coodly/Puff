@@ -35,8 +35,8 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
         super.init()
     }
     
-    public override func serialize(records: [R]) -> [CKRecord] {
-        return records.map({ serialize(entity: $0) })
+    public override func serialize(records: [R], in zone: CKRecordZone = .default()) -> [CKRecord] {
+        return records.map({ serialize(entity: $0, in: zone) })
     }
     
     public override func deserialize(records: [CKRecord]) -> [R] {
@@ -153,14 +153,14 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
         }
     }
     
-    private func serialize(entity: R) -> CKRecord {
+    private func serialize(entity: R, in zone: CKRecordZone) -> CKRecord {
         let record: CKRecord
         if let existing = unarchiveRecord(entity: entity) {
             record = existing
         } else if let name = entity.recordName {
-            record = CKRecord(recordType: R.recordType, recordID: CKRecord.ID(recordName: name))
+            record = CKRecord(recordType: R.recordType, recordID: CKRecord.ID(recordName: name, zoneID: zone.zoneID))
         } else {
-            record = CKRecord(recordType: R.recordType)
+            record = CKRecord(recordType: R.recordType, recordID: CKRecord.ID(recordName: UUID().uuidString, zoneID: zone.zoneID))
         }
         
         for (name, attribute) in entity.entity.attributesByName {

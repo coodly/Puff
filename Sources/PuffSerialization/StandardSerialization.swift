@@ -21,7 +21,7 @@ public class StandardSerialization<R: RemoteRecord>: RecordSerialization<R> {
         
     }
     
-    public override func serialize(records: [R]) -> [CKRecord] {
+    public override func serialize(records: [R], in zone: CKRecordZone = .default()) -> [CKRecord] {
         return records.map({ $0.recordRepresentation() })
     }
     
