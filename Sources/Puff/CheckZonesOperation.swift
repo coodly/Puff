@@ -16,6 +16,9 @@
 
 import Foundation
 import CloudKit
+#if canImport(PuffLogger)
+import PuffLogger
+#endif
 
 public class CheckZonesOperation: ConcurrentOperation {
     private let zones: [CKRecordZone]

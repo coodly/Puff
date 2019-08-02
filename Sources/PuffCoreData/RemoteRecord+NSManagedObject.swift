@@ -40,7 +40,7 @@ public extension RemoteRecord where Self: NSManagedObject {
         return true
     }
     
-    @available(OSX 10.11, *)
+    @available(OSX 10.11, iOS 9, *)
     internal func recordRepresentation() -> CKRecord? {
         let record = CKRecord(recordType: Self.recordType)
         
