@@ -18,7 +18,7 @@ import Foundation
 import CoreData
 @testable import PuffCoreData
 
-@available(OSX 10.12, *)
+@available(OSX 10.12, iOS 10, *)
 internal class Persistence {
     internal static func inMemoryPersistence() -> Persistence {
         return Persistence()

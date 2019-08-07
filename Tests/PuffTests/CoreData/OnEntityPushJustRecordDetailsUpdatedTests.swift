@@ -10,7 +10,7 @@ import XCTest
 @testable import PuffCoreData
 import CloudKit
 
-@available(OSX 10.12, *)
+@available(OSX 10.12, iOS 10, *)
 class OnEntityPushJustRecordDetailsUpdatedTests: XCTestCase {
     private var persistence: Persistence!
     private var serialization: CoreDataSerialization<Survivor>!
