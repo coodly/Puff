@@ -58,7 +58,7 @@ public class CheckZonesOperation: ConcurrentOperation {
         op.modifyRecordZonesCompletionBlock = {
             modified, deleted, error in
             
-            self.finish()
+            self.finish(error)
             
             if let error = error {
                 Logging.log("Create zones error \(error)")

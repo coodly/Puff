@@ -21,13 +21,13 @@ import PuffLogger
 #endif
 
 open class ConcurrentOperation: Operation {
-    public var completionHandler: ((Bool, ConcurrentOperation) -> ())?
+    public var completionHandler: ((Result<Void, Error>, ConcurrentOperation) -> ())?
     
     override open var isConcurrent: Bool {
         return true
     }
 
-    private var failed = false
+    private var failureRrror: Error?
     
     private var myExecuting: Bool = false
     override public final var isExecuting: Bool {
@@ -73,7 +73,11 @@ open class ConcurrentOperation: Operation {
                     return
                 }
                 
-                completion(!self.failed, self)
+                if let error = self.failureRrror {
+                    completion(.failure(error), self)
+                } else {
+                    completion(.success(()), self)
+                }
             }
         }
         
@@ -82,12 +86,12 @@ open class ConcurrentOperation: Operation {
         main()
     }
     
-    public func finish(_ failed: Bool = false) {
+    public func finish(_ failure: Error? = nil) {
         willChangeValue(forKey: "isExecuting")
         willChangeValue(forKey: "isFinished")
         myExecuting = false
         myFinished = true
-        self.failed = failed
+        failureRrror = failure
         didChangeValue(forKey: "isExecuting")
         didChangeValue(forKey: "isFinished")
     }

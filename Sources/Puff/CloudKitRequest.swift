@@ -75,7 +75,6 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
     
     fileprivate func handleResult(with cursor: CKQueryOperation.Cursor?, desiredKeys: [String]?, limit: Int? = nil, error: Error?, inDatabase db: UsedDatabase, retryClosure: @escaping () -> ()) {
         let finalizer: () -> ()
-        var hadFailure = false
         if let cursor = cursor {
             finalizer = {
                 self.records.removeAll()
@@ -84,7 +83,7 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
             }
         } else {
             finalizer = {
-                self.finish(hadFailure)
+                self.finish(error)
             }
         }
         
@@ -97,7 +96,6 @@ open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
             }
         } else {
             if let error = error {
-                hadFailure = true
                 Logging.log("Request error \(error)")
             }
             self.handle(result: CloudResult(records: self.records, deleted: self.deleted, hasMore: cursor != nil, error: error), completion: finalizer)
