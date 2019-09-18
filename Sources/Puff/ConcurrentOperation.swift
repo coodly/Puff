@@ -21,7 +21,32 @@ import PuffLogger
 #endif
 
 open class ConcurrentOperation: Operation {
-    public var completionHandler: ((Result<Void, Error>, ConcurrentOperation) -> ())?
+    private struct Forward {
+        fileprivate let callSuccess: (() -> Void)
+        fileprivate let callError: ((Error) -> Void)
+        
+        internal func forwardSuccess() {
+            callSuccess()
+        }
+        
+        internal func forward(error: Error) {
+            callError(error)
+        }
+    }
+    
+    public func onCompletion<T: ConcurrentOperation>(callback: @escaping ((Result<T, Error>) -> Void)) {
+        let onSuccess: (() -> Void) = {
+            callback(.success(self as! T))
+        }
+        let onError: ((Error) -> Void) = {
+            error in
+            
+            callback(.failure(error))
+        }
+        forward = Forward(callSuccess: onSuccess, callError: onError)
+    }
+    
+    private var forward: Forward?
     
     override open var isConcurrent: Bool {
         return true
@@ -69,14 +94,14 @@ open class ConcurrentOperation: Operation {
             completionBlock = {
                 [unowned self] in
                 
-                guard let completion = self.completionHandler else {
+                guard let forward = self.forward else {
                     return
                 }
                 
                 if let error = self.failureRrror {
-                    completion(.failure(error), self)
+                    forward.forward(error: error)
                 } else {
-                    completion(.success(()), self)
+                    forward.forwardSuccess()
                 }
             }
         }
