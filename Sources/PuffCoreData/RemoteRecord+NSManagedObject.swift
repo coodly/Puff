@@ -22,6 +22,7 @@ import CloudKit
 import PuffSerialization
 #endif
 
+// TODO jaanus: is this used?
 public extension RemoteRecord where Self: NSManagedObject {
     static var recordType: String {
         return entityName
