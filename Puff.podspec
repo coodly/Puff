@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Puff'
-  s.version = '0.5.5'
+  s.version = '0.5.6'
   s.license = 'Apache 2'
   s.summary = 'CloudKit wrapper'
   s.homepage = 'https://github.com/coodly/Puff'
