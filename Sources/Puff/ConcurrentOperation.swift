@@ -36,6 +36,8 @@ open class ConcurrentOperation: Operation {
     
     public func onCompletion<T: ConcurrentOperation>(callback: @escaping ((Result<T, Error>) -> Void)) {
         let onSuccess: (() -> Void) = {
+            [unowned self] in
+            
             callback(.success(self as! T))
         }
         let onError: ((Error) -> Void) = {
