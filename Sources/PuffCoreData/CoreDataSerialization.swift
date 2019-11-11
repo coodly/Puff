@@ -39,14 +39,24 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
         return records.map({ serialize(entity: $0, in: zone) })
     }
     
-    public override func deserialize(records: [CKRecord]) -> [R] {
+    public override func deserialize(records: [CKRecord], from zone: CKRecordZone = .default()) -> [R] {
         var deserialized = [R]()
         context.performAndWait {
             let names = records.map({ $0.recordID.recordName })
             let existing: [R] = context.fetch(with: names)
             for record in records {
                 let saved: R = existing.first(where: { $0.recordName == record.recordID.recordName }) ?? context.insertEntity()
+                
+                if let migration = zoneMigration, let zoned = saved as? CustomZoned, !migration.shouldLoad(entity: zoned, from: zone) {
+                    continue
+                }
+                
                 load(record: record, into: saved)
+                
+                if var zoned = saved as? CustomZoned {
+                    zoned.zoneName = zone.zoneID.zoneName
+                }
+                
                 deserialized.append(saved)
             }
         }
@@ -169,6 +179,10 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
             
             if name == PuffSystemAttributeModificationDate, entity is Timestamped {
+                continue
+            }
+            
+            if name == PuffSystemAttributeZoneName, entity is CustomZoned {
                 continue
             }
             
