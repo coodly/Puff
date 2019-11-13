@@ -221,7 +221,7 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             }
             
             if let synced = entity.value(forKey: name) as? RemoteRecord {
-                record[name] = synced.referenceRepresentation(action: .none)
+                record[name] = zonedReference(from: synced, fallback: zone)
                 continue
             }
             
@@ -229,7 +229,7 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 continue
             }
             
-            record[name] = relationshipRecords.map({ $0.referenceRepresentation(action: .none) })
+            record[name] = relationshipRecords.map({ zonedReference(from: $0, fallback: zone) })
         }
         
         return record
@@ -257,5 +257,16 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             Logging.log("Asset file write failed: \(error)")
             return nil
         }
+    }
+    
+    private func zonedReference(from record: RemoteRecord, fallback: CKRecordZone) -> CKRecord.Reference {
+        let zone: CKRecordZone
+        if let zoned = record as? CustomZoned, zoned.zoneName.count > 0 {
+            zone = CKRecordZone(zoneName: zoned.zoneName)
+        } else {
+            zone = fallback
+        }
+        
+        return CKRecord.Reference(recordID: CKRecord.ID(recordName: record.recordName!, zoneID: zone.zoneID), action: .none)
     }
 }
