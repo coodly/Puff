@@ -92,10 +92,10 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 continue
             }
             
-            if attribute.isTransient {
+            if attribute.puffIgnored {
                 continue
             }
-            
+                        
             switch attribute.attributeType {
             case .stringAttributeType,
                  .integer16AttributeType,
@@ -191,7 +191,7 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 continue
             }
             
-            if attribute.isTransient {
+            if attribute.puffIgnored {
                 continue
             }
             
@@ -275,5 +275,19 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
         }
         
         return CKRecord.Reference(recordID: CKRecord.ID(recordName: record.recordName!, zoneID: zone.zoneID), action: .none)
+    }
+}
+
+extension NSAttributeDescription {
+    fileprivate var puffIgnored: Bool {
+        if isTransient {
+            return true
+        }
+        
+        if let flag = userInfo?[PuffAttributeIgnored] as? String, let value = Bool(flag), value {
+            return true
+        }
+        
+        return false
     }
 }
