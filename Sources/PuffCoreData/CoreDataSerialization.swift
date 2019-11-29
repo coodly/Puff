@@ -122,6 +122,10 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
             guard cloudSerialized.shouldSerializeRelationship(named: name) else {
                 continue
             }
+            
+            if let strings = record[name] as? [String] {
+                continue
+            }
 
             let mappedReferences: [CKRecord.Reference]
             if let reference = record[name] as? CKRecord.Reference {
@@ -224,12 +228,14 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 record[name] = zonedReference(from: synced, fallback: zone)
                 continue
             }
-            
-            guard let set = entity.value(forKey: name) as? NSSet, let relationshipRecords = Array(set) as? [RemoteRecord] else {
-                continue
+
+            if let set = entity.value(forKey: name) as? NSSet, let toListElements = Array(set) as? [StringListItem] {
+                record[name] = toListElements.compactMap({ $0.stringValue() })
             }
             
-            record[name] = relationshipRecords.map({ zonedReference(from: $0, fallback: zone) })
+            if let set = entity.value(forKey: name) as? NSSet, let relationshipRecords = Array(set) as? [RemoteRecord] {
+                record[name] = relationshipRecords.map({ zonedReference(from: $0, fallback: zone) })
+            }
         }
         
         return record
