@@ -16,6 +16,6 @@
 
 import Foundation
 
-public protocol StringListItem {
-    func stringValue() -> String?
+public protocol RelationshipListLoading {
+    func load<T>(values: [T], on relationship: String)
 }

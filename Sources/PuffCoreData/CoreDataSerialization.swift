@@ -123,7 +123,8 @@ public class CoreDataSerialization<R: RemoteRecord & NSManagedObject>: RecordSer
                 continue
             }
             
-            if let strings = record[name] as? [String] {
+            if let strings = record[name] as? [String], let loading = local as? RelationshipListLoading {
+                loading.load(values: strings, on: name)
                 continue
             }
 
