@@ -35,7 +35,7 @@ let package = Package(
             dependencies: ["PuffSerialization"]),
         .target(
             name: "PuffSerialization",
-            dependencies: []),
+            dependencies: ["PuffLogger"]),
         .target(
             name: "PuffLogger",
             dependencies: []),
