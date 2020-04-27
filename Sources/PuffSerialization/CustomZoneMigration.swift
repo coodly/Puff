@@ -23,7 +23,7 @@ public class CustomZoneMigration {
         self.priority = priority
     }
     
-    internal func shouldLoad(entity: CustomZoned, from zone: CKRecordZone) -> Bool {
+    public func shouldLoad(entity: CustomZoned, from zone: CKRecordZone) -> Bool {
         if entity.zoneName == priority.zoneID.zoneName && zone.zoneID.zoneName != priority.zoneID.zoneName {
             return false
         }
