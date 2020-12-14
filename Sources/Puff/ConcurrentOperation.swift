@@ -93,13 +93,6 @@ open class ConcurrentOperation: Operation {
             return
         }
         
-        if cancelOnDependencyFailure, let dependencyError = anyDependencyError {
-            Logging.log("Dependency had error: \(dependencyError)")
-            let failure = NSError(domain: "com.coodly.concurrent", code: 0, userInfo: [NSUnderlyingErrorKey: dependencyError])
-            finish(failure)
-            return
-        }
-        
         if completionBlock != nil {
             Logging.log("Existing completion block. Will not add own handling")
         } else {
@@ -116,6 +109,14 @@ open class ConcurrentOperation: Operation {
                     forward.forwardSuccess()
                 }
             }
+        }
+        
+        if cancelOnDependencyFailure, let dependencyError = anyDependencyError {
+            Logging.log("Dependency had error: \(dependencyError)")
+            let forward = (dependencyError as NSError).userInfo[NSUnderlyingErrorKey] as? Error ?? dependencyError
+            let failure = NSError(domain: "com.coodly.concurrent", code: 0, userInfo: [NSUnderlyingErrorKey: forward])
+            finish(failure)
+            return
         }
         
         self.myExecuting = true
