@@ -15,9 +15,11 @@
  */
 
 import Foundation
-
 #if canImport(PuffLogger)
 import PuffLogger
+#endif
+#if canImport(Combine)
+import Combine
 #endif
 
 open class ConcurrentOperation: Operation {
@@ -34,6 +36,16 @@ open class ConcurrentOperation: Operation {
         internal func forward(error: Error) {
             callError(error)
         }
+    }
+    
+    @available(iOS 13.0, macOS 10.15, *)
+    public func completionPublisher<T: ConcurrentOperation>() -> AnyPublisher<T, Error> {
+        Future<T, Error>() {
+            promise in
+                
+            self.forward = Forward(callSuccess: { promise(.success(self as! T)) }, callError: { promise(.failure($0)) })
+            
+        }.eraseToAnyPublisher()
     }
     
     public func onCompletion<T: ConcurrentOperation>(callback: @escaping ((Result<T, Error>) -> Void)) {
