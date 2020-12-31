@@ -39,11 +39,11 @@ open class ConcurrentOperation: Operation {
     }
     
     @available(iOS 13.0, macOS 10.15, *)
-    public func completionPublisher<T: ConcurrentOperation>() -> AnyPublisher<T, Error> {
-        Future<T, Error>() {
+    public func completionPublisher<T: ConcurrentOperation>() -> AnyPublisher<Result<T, Error>, Never> {
+        Future<Result<T, Error>, Never>() {
             promise in
                 
-            self.forward = Forward(callSuccess: { promise(.success(self as! T)) }, callError: { promise(.failure($0)) })
+            self.forward = Forward(callSuccess: { promise(.success(.success(self as! T))) }, callError: { promise(.success(.failure($0))) })
             
         }.eraseToAnyPublisher()
     }
