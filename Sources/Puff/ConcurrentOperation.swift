@@ -120,6 +120,8 @@ open class ConcurrentOperation: Operation {
                 } else {
                     forward.forwardSuccess()
                 }
+                
+                self.forward = nil
             }
         }
         
