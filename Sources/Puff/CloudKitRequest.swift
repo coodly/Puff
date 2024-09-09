@@ -33,6 +33,13 @@ public struct CloudResult<T: RemoteRecord> {
     public let deleted: [CKRecord.ID]
     public let hasMore: Bool
     public let error: Error?
+  
+  public init(records: [T], deleted: [CKRecord.ID], hasMore: Bool, error: Error?) {
+    self.records = records
+    self.deleted = deleted
+    self.hasMore = hasMore
+    self.error = error
+  }
 }
 
 open class CloudKitRequest<T: RemoteRecord>: ConcurrentOperation {
